@@ -10,10 +10,5 @@ namespace HotelDaisy.Controllers
 		{
 			return View();
 		}
-
-		public IActionResult Privacy()
-		{
-			return View();
-		}
 	}
 }
