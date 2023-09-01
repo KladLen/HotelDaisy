@@ -11,7 +11,7 @@ namespace HotelDaisy.Models
 		public int ClientId { get; set; }
 		public Client Client { get; set; }
 		//[ForeignKey("Apartament")]
-		public int ApartamentId { get; set; }
-		public Apartament Apartament { get; set; }
+		public int ApartmentId { get; set; }
+		public Apartment Apartment { get; set; }
 	}
 }

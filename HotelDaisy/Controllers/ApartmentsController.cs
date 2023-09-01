@@ -4,17 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HotelDaisy.Controllers
 {
-	public class ApartamentsController : Controller
+	public class ApartmentsController : Controller
 	{
 		private readonly ApplicationDbContext _db;
-		public ApartamentsController(ApplicationDbContext db)
+		public ApartmentsController(ApplicationDbContext db)
 		{
 			_db = db;
 		}
 		public IActionResult Index()
 		{
-			IEnumerable<Apartament> objApartamentList = _db.Apartaments;
-			return View(objApartamentList);
+			IEnumerable<Apartment> objApartmentList = _db.Apartments;
+			return View(objApartmentList);
 		}
 	}
 }

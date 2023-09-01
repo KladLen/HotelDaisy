@@ -2,7 +2,7 @@
 
 namespace HotelDaisy.Models
 {
-	public class Apartament
+	public class Apartment
 	{
 		public int Id { get; set; }
 		public int? NumberOfRooms { get; set; }
