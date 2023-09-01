@@ -5,44 +5,43 @@
 }
 
 <div class="container p-2">
-    <h1 class="display-3 text-center">Check our Apartments</h1>
+    <h1 class="display-3 pb-4 text-center">Check our Apartments</h1>
 
-	<table class="table table-striped" style="width:100%">
-		<thead>
+	<table class="table table-bordered align-middle" style="width:100%">
+		@foreach (var obj in Model)
+		{
+			string imageBase64Data = Convert.ToBase64String(obj.Image);
+			string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
 			<tr>
-				<th>
+				<td rowspan="4">
+					<img src="@imageDataURL" style="max-width: 100%; height: auto;">
+				</td>
+				<th class="ps-3" style="width:25%">
 					Rooms number
 				</th>
-				<th>
+				<td class="ps-3" style="width:25%">
+					@obj.NumberOfRooms
+				</td>
+			</tr>
+			<tr>
+				<th class="ps-3">
 					Balcony
 				</th>
-				<th>
+				<td class="ps-3">
+					@obj.Balcony
+				</td>
+			</tr>
+			<tr>
+				<th class="ps-3">
 					Price
 				</th>
-				<th>
-				</th>
+				<td class="ps-3">
+					@obj.Price
+				</td>
 			</tr>
-		</thead>
-		<tbody>
-			@foreach (var obj in Model)
-			{
-				string imageBase64Data = Convert.ToBase64String(obj.Image);
-				string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
-				<tr>
-					<td width="25%">
-						@obj.NumberOfRooms
-					</td>
-					<td>
-						@obj.Balcony
-					</td>
-					<td>
-						@obj.Price
-					</td>
-					<td>
-						<img src="@imageDataURL" width="400">
-					</td>
-				</tr>
-			}
-		</tbody>
+			<tr>
+				<td colspan="2">OK?</td>
+			</tr>
+		}
 	</table>
 </div>
