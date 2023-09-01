@@ -11,6 +11,7 @@ namespace HotelDaisy.Controllers
 		{
 			_db = db;
 		}
+		//GET
 		public IActionResult Index()
 		{
 			IEnumerable<Apartment> objApartmentList = _db.Apartments;

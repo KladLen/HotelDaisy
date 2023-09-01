@@ -1,0 +1,14 @@
+﻿@model Reservation
+
+@{
+	ViewData["Title"] = "Reservation";
+	var id = ViewContext.RouteData.Values["Id"];
+}
+
+<form method="post">
+	<div class="border">
+		<div class="row">
+			<h2 class="text-primary">Make reservation for Apartment @id</h2>
+		</div>
+	</div>
+</form>
