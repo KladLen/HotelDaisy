@@ -12,7 +12,18 @@ namespace HotelDaisy.Controllers
 			_db = db;
 		}
 		//GET
-		public IActionResult Create()
+		public IActionResult Index()
+		{
+			return View();
+		}
+		//POST
+		[HttpPost]
+        public IActionResult Index(DateOnly? startDate, DateOnly? endDate)
+        {
+            return View();
+        }
+        //GET
+        public IActionResult Create()
 		{
 			return View();
 		}
