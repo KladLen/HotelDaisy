@@ -45,7 +45,7 @@ namespace HotelDaisy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Apartments");
+                    b.ToTable("Apartments", (string)null);
                 });
 
             modelBuilder.Entity("HotelDaisy.Models.Client", b =>
@@ -70,7 +70,7 @@ namespace HotelDaisy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("HotelDaisy.Models.Reservation", b =>
@@ -99,7 +99,7 @@ namespace HotelDaisy.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("HotelDaisy.Models.Reservation", b =>

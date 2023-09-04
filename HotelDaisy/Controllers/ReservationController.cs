@@ -18,21 +18,21 @@ namespace HotelDaisy.Controllers
 		}
 		//POST
 		[HttpPost]
-        public IActionResult Index(DateOnly? startDate, DateOnly? endDate)
-        {
+		public IActionResult Index(Reservation obj)
+		{
             return View();
-        }
-        //GET
-        public IActionResult Create()
-		{
-			return View();
 		}
+		//      //GET
+		//      public IActionResult Create()
+		//{
+		//	return View();
+		//}
 
-		//POST
-		[HttpPost]
-		public IActionResult Create(Reservation obj)
-		{
-			return View(obj);
-		}
+		////POST
+		//[HttpPost]
+		//public IActionResult Create(Reservation obj)
+		//{
+		//	return View(obj);
+		//}
 	}
 }

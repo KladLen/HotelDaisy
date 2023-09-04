@@ -1,16 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelDaisy.Models
 {
 	public class Reservation
 	{
 		public int Id { get; set; }
-		public DateOnly? StartDate { get; set; }
-		public DateOnly? EndDate { get; set; }
-		//[ForeignKey("Client")]
+		[DisplayName("Start Date")]
+		public DateTime? StartDate { get; set; }
+		[DisplayName("End Date")]
+		public DateTime? EndDate { get; set; }
 		public int ClientId { get; set; }
 		public Client Client { get; set; }
-		//[ForeignKey("Apartament")]
 		public int ApartmentId { get; set; }
 		public Apartment Apartment { get; set; }
 	}
