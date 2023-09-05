@@ -20,7 +20,24 @@ namespace HotelDaisy.Controllers
 		[HttpPost]
 		public IActionResult Index(Reservation obj)
 		{
-            return View();
+			if (obj.StartDate == null || obj.EndDate == null || obj.StartDate >= obj.EndDate) 
+			{
+				return View();
+			}
+			DateTime startDate = (DateTime)obj.StartDate;
+			DateTime endDate = (DateTime)obj.EndDate;
+			if (startDate < DateTime.Now)
+			{
+				return View();
+			}
+			bool isOverlap = _db.Reservations
+				.Any(o => !((startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate)));
+
+			if (isOverlap)
+			{
+				return View();
+			}
+			return RedirectToAction("Create");
 		}
 		//      //GET
 		//      public IActionResult Create()
