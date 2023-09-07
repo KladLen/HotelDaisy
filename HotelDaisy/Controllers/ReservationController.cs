@@ -30,6 +30,10 @@ namespace HotelDaisy.Controllers
 			{
 				return View();
 			}
+			var availableApartmentsIds = _db.Reservations
+				.Where(o => ((startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate)))
+				.GroupBy(o => o.ApartmentId).Select(group => group.Key).ToList();
+
 			bool isOverlap = _db.Reservations
 				.Any(o => !((startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate)));
 
@@ -37,7 +41,14 @@ namespace HotelDaisy.Controllers
 			{
 				return View();
 			}
-			return RedirectToAction("Create");
+//			List<int> ids = availableApartments.ToList();
+
+            return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds });
+		}
+		//GET
+		public IActionResult CreateFromDate(List<int> sendIds)
+		{
+			return View(sendIds);
 		}
 		//      //GET
 		//      public IActionResult Create()
