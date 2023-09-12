@@ -1,5 +1,6 @@
 ﻿using HotelDaisy.Data;
 using HotelDaisy.Models;
+using HotelDaisy.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelDaisy.Controllers
@@ -26,6 +27,7 @@ namespace HotelDaisy.Controllers
 			}
 			DateTime startDate = (DateTime)obj.StartDate;
 			DateTime endDate = (DateTime)obj.EndDate;
+
 			if (startDate < DateTime.Now)
 			{
 				return View();
@@ -56,7 +58,13 @@ namespace HotelDaisy.Controllers
 		//GET
 		public IActionResult CreateFromDate(List<int> sendIds, DateTime sendStart, DateTime sendEnd)
 		{
-			return View(sendIds);
+			var model = new AvailableReservation
+			{
+                AvailableApartmentsIds = sendIds,
+                StartDate = DateOnly.FromDateTime(sendStart),
+				EndDate = DateOnly.FromDateTime(sendEnd)
+			};
+			return View(model);
 		}
 		//      //GET
 		//      public IActionResult Create()

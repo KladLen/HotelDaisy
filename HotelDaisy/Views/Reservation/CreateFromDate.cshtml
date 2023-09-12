@@ -1,11 +1,12 @@
-﻿@model List<int>
+﻿@model HotelDaisy.Models.ViewModels.AvailableReservation
 
 <div>
-    <h1 class="display-4 text-center">Choose date for your reservation</h1>
+    <h1 class="display-4 text-center">Choose apartment for your reservation</h1>
+    <h1 class="display-6 text-center">@Model.StartDate - @Model.EndDate</h1>
     <div class="row">
-        @foreach (var apartmentId in Model)
+        @foreach (var apartmentId in Model.AvailableApartmentsIds)
         {
-            <r>@apartmentId</r>
+            <table>@apartmentId</table>
         }
     </div>
 </div>
