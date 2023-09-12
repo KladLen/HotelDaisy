@@ -30,23 +30,31 @@ namespace HotelDaisy.Controllers
 			{
 				return View();
 			}
-			var availableApartmentsIds = _db.Reservations
-				.Where(o => ((startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate)))
-				.GroupBy(o => o.ApartmentId).Select(group => group.Key).ToList();
 
-			bool isOverlap = _db.Reservations
-				.Any(o => !((startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate)));
+			List<int> availableApartmentsIds = new List<int>();
+            bool isAvailable = false;
+            var apartamentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
+            
+			//var availableApartmentsIds = apartamentIdGroup
+			//	.Where(g => g.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate))).Select(g => g.Key).ToList();
 
-			if (isOverlap)
+            foreach (var group in apartamentIdGroup)
+			{
+				isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
+				if (isAvailable)
+				{
+					availableApartmentsIds.Add(group.Key);
+				}
+            }
+
+			if (availableApartmentsIds == null)
 			{
 				return View();
 			}
-//			List<int> ids = availableApartments.ToList();
-
-            return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds });
+            return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
 		}
 		//GET
-		public IActionResult CreateFromDate(List<int> sendIds)
+		public IActionResult CreateFromDate(List<int> sendIds, DateTime sendStart, DateTime sendEnd)
 		{
 			return View(sendIds);
 		}
