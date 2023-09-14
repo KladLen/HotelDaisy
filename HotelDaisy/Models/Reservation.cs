@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using HotelDaisy.Data;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,8 +12,8 @@ namespace HotelDaisy.Models
 		public DateTime? StartDate { get; set; }
 		[DisplayName("End Date")]
 		public DateTime? EndDate { get; set; }
-		public int ClientId { get; set; }
-		public Client Client { get; set; }
+		public string? UserId { get; set; }
+		public ApplicationUser User { get; set; }
 		public int ApartmentId { get; set; }
 		public Apartment Apartment { get; set; }
 	}
