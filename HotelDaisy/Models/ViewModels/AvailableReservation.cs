@@ -4,6 +4,7 @@
     {
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public List<int> AvailableApartmentsIds { get; set; }
+        public List<Apartment> AvailableApartments { get; set; }
+        public int ChosenApartmentId { get; set; }
     }
 }

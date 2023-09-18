@@ -1,12 +1,47 @@
 ﻿@model HotelDaisy.Models.ViewModels.AvailableReservation
 
-<div>
-    <h1 class="display-4 text-center">Choose apartment for your reservation</h1>
-    <h1 class="display-6 text-center">@Model.StartDate - @Model.EndDate</h1>
-    <div class="row">
-        @foreach (var apartmentId in Model.AvailableApartmentsIds)
-        {
-            <div>@apartmentId</div>
-        }
-    </div>
-</div>
+<h1 class="display-4 text-center">Choose apartment for your reservation</h1>
+<h1 class="display-6 text-center">@Model.StartDate - @Model.EndDate</h1>
+
+<table class="table table-bordered align-middle" style="width:100%">
+    @foreach (var obj in Model.AvailableApartments)
+    {
+	string imageBase64Data = Convert.ToBase64String(obj.Image);
+	string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+	<form method="post" asp-controller="Reservation" asp-action="CreateFromDate">
+		<input type="hidden" name="ChosenApartmentId" value="@obj.Id">
+		<tr>
+			<td rowspan="4">
+				<img src="@imageDataURL" style="max-width: 100%; height: auto;">
+			</td>
+			<th class="ps-3" style="width:25%">
+				Rooms number
+			</th>
+			<td class="ps-3" style="width:25%">
+				@obj.NumberOfRooms
+			</td>
+		</tr>
+		<tr>
+			<th class="ps-3">
+				Balcony
+			</th>
+			<td class="ps-3">
+				@obj.Balcony
+			</td>
+		</tr>
+		<tr>
+			<th class="ps-3">
+				Price
+			</th>
+			<td class="ps-3">
+				@obj.Price
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button type="submit" class="btn btn-primary w-50">Book now</button>
+			</td>
+		</tr>
+	</form>
+    }
+</table>
