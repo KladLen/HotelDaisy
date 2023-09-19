@@ -27,8 +27,12 @@ namespace HotelDaisy.Controllers
 		[HttpPost]
 		public IActionResult Index(Reservation obj)
 		{
+			if (ModelState.IsValid)
+			{
+			}
 			if (obj.StartDate == null || obj.EndDate == null || obj.StartDate >= obj.EndDate) 
 			{
+				ModelState.AddModelError("", "Incorrect inputs.");
 				return View();
 			}
 			DateTime startDate = (DateTime)obj.StartDate;
@@ -36,22 +40,16 @@ namespace HotelDaisy.Controllers
 
 			if (startDate < DateTime.Now)
 			{
+				ModelState.AddModelError("", "The date can't be earlier than today's date.");
 				return View();
 			}
 
-			List<int> availableApartmentsIds = new List<int>();
             bool isAvailable = false;
             var apartamentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
 
-			List<int> allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId).ToList();
-			List<int> allApartmentsId = _db.Apartments.Select(a => a.Id).ToList();
-			foreach (var id in allApartmentsId)
-			{
-				if (!allApartmentsInReservation.Contains(id))
-				{
-					availableApartmentsIds.Add(id);
-				}
-			}
+			var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
+			var allApartmentsId = _db.Apartments.Select(a => a.Id);
+            List<int> availableApartmentsIds = allApartmentsId.Except(allApartmentsInReservation).ToList();
 
 			if (_db.Reservations.IsNullOrEmpty())
 			{
@@ -59,8 +57,6 @@ namespace HotelDaisy.Controllers
                 return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
             }
 
-            //var availableApartmentsIds = apartamentIdGroup
-            //	.Where(g => g.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate))).Select(g => g.Key).ToList();
             foreach (var group in apartamentIdGroup)
 			{
 				isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
@@ -70,9 +66,10 @@ namespace HotelDaisy.Controllers
 				}
             }
 
-			if (availableApartmentsIds == null)
+			if (availableApartmentsIds.IsNullOrEmpty())
 			{
-				return View();
+                ModelState.AddModelError("", "No apartments available at this time.");
+                return View();
 			}
 
             return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
@@ -95,6 +92,7 @@ namespace HotelDaisy.Controllers
 
 		//POST
 		[HttpPost]
+		[Authorize]
 		public IActionResult CreateFromDate(AvailableReservation obj)
 		{
 			if (User.Identity.IsAuthenticated)
