@@ -14,6 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
 	.AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddMvc().AddXmlSerializerFormatters();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Protocol.Plugins;
 
 namespace HotelDaisy.Controllers
 {
@@ -25,107 +26,104 @@ namespace HotelDaisy.Controllers
 		}
 		//POST
 		[HttpPost]
-		public IActionResult Index(Reservation obj)
+		public IActionResult Index(ReservationTime obj)
 		{
 			if (ModelState.IsValid)
 			{
-			}
-			if (obj.StartDate == null || obj.EndDate == null || obj.StartDate >= obj.EndDate) 
-			{
-				ModelState.AddModelError("", "Incorrect inputs.");
-				return View();
-			}
-			DateTime startDate = (DateTime)obj.StartDate;
-			DateTime endDate = (DateTime)obj.EndDate;
+                if (obj.StartDate >= obj.EndDate)
+                {
+                    ModelState.AddModelError("", "Start date must be earlier than end date.");
+                    return View();
+                }
 
-			if (startDate < DateTime.Now)
-			{
-				ModelState.AddModelError("", "The date can't be earlier than today's date.");
-				return View();
-			}
+                DateTime startDate = obj.StartDate;
+                DateTime endDate = obj.EndDate;
 
-            bool isAvailable = false;
-            var apartamentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
+                if (startDate < DateTime.Now)
+                {
+                    ModelState.AddModelError("", "The date can't be earlier than today's date.");
+                    return View();
+                }
 
-			var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
-			var allApartmentsId = _db.Apartments.Select(a => a.Id);
-            List<int> availableApartmentsIds = allApartmentsId.Except(allApartmentsInReservation).ToList();
+                bool isAvailable = false;
+                var apartamentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
 
-			if (_db.Reservations.IsNullOrEmpty())
-			{
-				availableApartmentsIds = _db.Apartments.Select(o => o.Id).ToList();
+                var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
+                var allApartmentsId = _db.Apartments.Select(a => a.Id);
+                List<int> availableApartmentsIds = allApartmentsId.Except(allApartmentsInReservation).ToList();
+
+                if (_db.Reservations.IsNullOrEmpty())
+                {
+                    availableApartmentsIds = _db.Apartments.Select(o => o.Id).ToList();
+                    return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
+                }
+
+                foreach (var group in apartamentIdGroup)
+                {
+                    isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
+                    if (isAvailable)
+                    {
+                        availableApartmentsIds.Add(group.Key);
+                    }
+                }
+
+                if (availableApartmentsIds.IsNullOrEmpty())
+                {
+                    ModelState.AddModelError("", "No apartments available at this time.");
+                    return View();
+                }
+
                 return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
             }
-
-            foreach (var group in apartamentIdGroup)
-			{
-				isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
-				if (isAvailable)
-				{
-					availableApartmentsIds.Add(group.Key);
-				}
-            }
-
-			if (availableApartmentsIds.IsNullOrEmpty())
-			{
-                ModelState.AddModelError("", "No apartments available at this time.");
-                return View();
-			}
-
-            return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
-		}
+            
+            ModelState.AddModelError("", "Input date are not valid.");
+			return View();
+        }
 
 		//GET
 		public IActionResult CreateFromDate(List<int> sendIds, DateTime sendStart, DateTime sendEnd)
-		{
-			TempData["StartDate"] = sendStart.ToString();
-			TempData["EndDate"] = sendEnd.ToString();
-			var availableApartments = _db.Apartments.Where(o => sendIds.Contains(o.Id)).ToList();
-			var model = new AvailableReservation
-			{
-                AvailableApartments = availableApartments,
-                StartDate = DateOnly.FromDateTime(sendStart),
-				EndDate = DateOnly.FromDateTime(sendEnd)
-			};
-			return View(model);
+        {
+            List<Apartment> availableApartments = _db.Apartments.Where(o => sendIds.Contains(o.Id)).ToList();
+            var viewModel = new AvailableReservation
+            {
+                StartDate = sendStart,
+                EndDate = sendEnd,
+                AvailableApartments = availableApartments
+            };
+            TempData["StartDate"] = sendStart.ToString();
+            TempData["EndDate"] = sendEnd.ToString();
+            return View(viewModel);
 		}
 
 		//POST
 		[HttpPost]
 		[Authorize]
-		public IActionResult CreateFromDate(AvailableReservation obj)
+		public IActionResult CreateFromDate(int apartmentId)
 		{
-			if (User.Identity.IsAuthenticated)
-			{ 
-				var userId = _userManager.GetUserId(User);
-				var startDateString = TempData["StartDate"] as string;
-				var endDateString = TempData["EndDate"] as string;
+			if (ModelState.IsValid)
+			{
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userId = _userManager.GetUserId(User);
+                    var startDateString = TempData["StartDate"] as string;
+                    var endDateString = TempData["EndDate"] as string;
 
-				Reservation reservation = new Reservation 
-				{
-					StartDate = DateTime.Parse(startDateString),
-					EndDate = DateTime.Parse(endDateString),
-					UserId = userId,
-					ApartmentId = obj.ChosenApartmentId
-				};
-				_db.Reservations.Add(reservation);
-				_db.SaveChanges();
-				return RedirectToAction("Index");
-			}
-			return RedirectToAction("/Account/Login", new {area = "Identity"});
+                    Reservation reservation = new Reservation
+                    {
+                        StartDate = DateTime.Parse(startDateString),
+                        EndDate = DateTime.Parse(endDateString),
+                        UserId = userId,
+                        ApartmentId = apartmentId
+                    };
+                    _db.Reservations.Add(reservation);
+                    _db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+
+                return RedirectToAction("/Account/Login", new { area = "Identity" });
+            }
+
+            return View();
 		}
-
-		////GET
-		//public IActionResult Create()
-		//{
-		//	return View();
-		//}
-
-		////POST
-		//[HttpPost]
-		//public IActionResult Create(Reservation obj)
-		//{
-		//	return View(obj);
-		//}
 	}
 }

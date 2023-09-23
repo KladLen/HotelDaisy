@@ -9,10 +9,10 @@ namespace HotelDaisy.Models
 	{
 		public int Id { get; set; }
 		[DisplayName("Start Date")]
-		public DateTime? StartDate { get; set; }
+		public DateTime StartDate { get; set; }
 		[DisplayName("End Date")]
-		public DateTime? EndDate { get; set; }
-		public string? UserId { get; set; }
+		public DateTime EndDate { get; set; }
+		public string UserId { get; set; }
 		public ApplicationUser User { get; set; }
 		public int ApartmentId { get; set; }
 		public Apartment Apartment { get; set; }
