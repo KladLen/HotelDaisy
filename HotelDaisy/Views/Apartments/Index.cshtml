@@ -1,4 +1,10 @@
-﻿@model IEnumerable<Apartment>
+﻿@using Microsoft.AspNetCore.Identity
+@using HotelDaisy.Data
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@model IEnumerable<Apartment>
 
 @{
 	ViewData["Title"] = "Apartments";
@@ -15,32 +21,37 @@
 				<td rowspan="4">
 					<img src="@imageDataURL" style="max-width: 100%; height: auto;">
 				</td>
-				<th class="ps-3" style="width:25%">
+				<th style="width:25%">
 					Rooms number
 				</th>
-				<td class="ps-3" style="width:25%">
+				<td style="width:25%">
 					@obj.NumberOfRooms
 				</td>
 			</tr>
 			<tr>
-				<th class="ps-3">
+				<th>
 					Balcony
 				</th>
-				<td class="ps-3">
+				<td>
 					@obj.Balcony
 				</td>
 			</tr>
 			<tr>
-				<th class="ps-3">
+				<th>
 					Price
 				</th>
-				<td class="ps-3">
+				<td>
 					@obj.Price
 				</td>
 			</tr>
 			<tr>
 				<td colspan="2">
 					<a class="btn btn-primary w-50" asp-controller="Reservation" asp-action="CreateForSelectedApartment" asp-route-Id="@obj.Id">Book now</a>
+					@if (User.IsInRole("Admin"))
+					{
+						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Edit" asp-route-Id="@obj.Id">Edit</a>
+						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Delete" asp-route-Id="@obj.Id">Delete</a>
+					}
 				</td>
 			</tr>
 		}

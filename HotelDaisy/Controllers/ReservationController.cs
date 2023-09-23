@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using NuGet.Protocol.Plugins;
 
 namespace HotelDaisy.Controllers
 {
@@ -130,7 +129,6 @@ namespace HotelDaisy.Controllers
         //GET
         public IActionResult CreateForSelectedApartment(int id)
         {
-     //       TempData["Id"] = id;
             var viewModel = new ReservationTimeForOneApartment
             {
                 ApartmentId = id,
@@ -167,7 +165,6 @@ namespace HotelDaisy.Controllers
                         return View(viewModel);
                     }
 
-                    //var id = (int)TempData["Id"];
                     var isAvailable = _db.Reservations
                         .Where(r => r.ApartmentId == obj.ApartmentId)
                         .All(o => (obj.StartDate <= o.StartDate && obj.EndDate <= o.StartDate) || (obj.StartDate >= o.EndDate && obj.EndDate >= o.EndDate));
