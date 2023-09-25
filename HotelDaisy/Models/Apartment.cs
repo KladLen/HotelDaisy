@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelDaisy.Models
 {
 	public class Apartment
 	{
 		public int Id { get; set; }
+		[DisplayName("Rooms number")]
 		public int? NumberOfRooms { get; set; }
 		public bool? Balcony { get; set; }
 		[Column(TypeName = "decimal(6,2)")]

@@ -10,8 +10,12 @@
 	ViewData["Title"] = "Apartments";
 }
 
-<div class="container p-2">
+<div class="container">
     <h1 class="display-4 pb-4 text-center">Check our Apartments</h1>
+	@if (User.IsInRole("Admin"))
+	{
+		<a class="btn btn-primary float-end mb-2" asp-controller="Apartments" asp-action="Create">Add new Apartment</a>
+	}
 	<table class="table table-bordered align-middle" style="width:100%">
 		@foreach (var obj in Model)
 		{
@@ -45,7 +49,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td colspan="2">
+				<td colspan="2" style="height:100px">
 					<a class="btn btn-primary w-50" asp-controller="Reservation" asp-action="CreateForSelectedApartment" asp-route-Id="@obj.Id">Book now</a>
 					@if (User.IsInRole("Admin"))
 					{

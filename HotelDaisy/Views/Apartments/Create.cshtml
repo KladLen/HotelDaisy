@@ -1,21 +1,22 @@
-﻿@model Apartment
+﻿@using HotelDaisy.Models.ViewModels;
+
+@model ApartmentVM
 
 @{
-	ViewData["Title"] = "Edit";
-	var id = ViewContext.RouteData.Values["Id"];
+	ViewData["Title"] = "Create";
 }
 
-<h1 class="display-4 pb-4 text-center">Edit Apartment number @id</h1>
+<h1 class="display-4 pb-4 text-center">Enter data for a new Apartment</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
 	<div class="container">
 		<table class="table table-bordered align-middle" style="width:100%">
 			<tr>
 				<th>
-					<label asp-for="Image" class="col-form-label"></label>
+					<label asp-for="ImageFile" class="col-form-label"></label>
 				</th>
 				<td>
-					<input asp-for="Image" type="file" class="form-control" />
+					<input asp-for="ImageFile" type="file" class="form-control" />
 				</td>
 			</tr>
 			<tr>
@@ -31,7 +32,7 @@
 					<label asp-for="Balcony" class="col-form-label"></label>
 				</th>
 				<td>
-					<input asp-for="Balcony" type="" class="form-control" />
+					<input asp-for="Balcony" type="checkbox" class="form-check-control" />
 				</td>
 			</tr>
 			<tr>
@@ -46,8 +47,8 @@
 				<td>
 				</td>
 				<td>
-					<button type="submit" class="btn btn-primary">Save changes</button>
-					<a asp-controller ="Apartments" asp-action="Index" button type="submit" class="btn btn-secondary">Back to list</a>
+					<button type="submit" class="btn btn-primary">Add Apartment</button>
+					<a asp-controller="Apartments" asp-action="Index" button type="submit" class="btn btn-secondary">Back to list</a>
 				</td>
 			</tr>
 		</table>
