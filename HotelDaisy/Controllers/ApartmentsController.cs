@@ -61,7 +61,18 @@ namespace HotelDaisy.Controllers
 		public IActionResult Edit(int id)
 		{
 			Apartment apartment = _db.Apartments.FirstOrDefault(a => a.Id == id);
-			return View(apartment);
+			if (apartment == null)
+			{
+				return NotFound();
+			}
+			ApartmentVM viewModel = new ApartmentVM
+			{
+				NumberOfRooms = apartment.NumberOfRooms,
+				Balcony = apartment.Balcony,
+				Price = apartment.Price,
+				Image = apartment.Image
+			};
+			return View(viewModel);
 		}
 
 		//POST

@@ -13,7 +13,9 @@ namespace HotelDaisy.Models.ViewModels
 		public bool Balcony { get; set; }
 		[Column(TypeName = "decimal(6,2)")]
 		public decimal Price { get; set; }
-		[DisplayName("Image file")]
+		[DisplayName("Current image")]
+		public byte[] Image { get; set; }
+		[DisplayName("New image")]
 		public IFormFile ImageFile { get; set; }
 	}
 }

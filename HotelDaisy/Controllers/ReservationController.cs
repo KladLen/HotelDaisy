@@ -179,7 +179,7 @@ namespace HotelDaisy.Controllers
                         };
                         _db.Reservations.Add(reservation);
                         _db.SaveChanges();
-                        return View("Index");
+                        return RedirectToAction("Index", "Home");
                     }
 
                     ModelState.AddModelError("", "Selected Apartment is not available at this time. Check another dates.");

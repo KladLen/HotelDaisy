@@ -1,8 +1,12 @@
-﻿@model Apartment
+﻿@using HotelDaisy.Models.ViewModels;
+
+@model ApartmentVM
 
 @{
 	ViewData["Title"] = "Edit";
 	var id = ViewContext.RouteData.Values["Id"];
+	string imageBase64Data = Convert.ToBase64String(Model.Image);
+	string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
 }
 
 <h1 class="display-4 pb-4 text-center">Edit Apartment number @id</h1>
@@ -11,11 +15,19 @@
 	<div class="container">
 		<table class="table table-bordered align-middle" style="width:100%">
 			<tr>
-				<th>
-					<label asp-for="Image" class="col-form-label"></label>
+				<th style="width:15%">
+					Current image
 				</th>
 				<td>
-					<input asp-for="Image" type="file" class="form-control" />
+					<img src="@imageDataURL" style="width: 40%; height: auto;">
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<label asp-for="ImageFile" class="col-form-label"></label>
+				</th>
+				<td>
+					<input asp-for="ImageFile" type="file" class="form-control" />
 				</td>
 			</tr>
 			<tr>
@@ -31,7 +43,7 @@
 					<label asp-for="Balcony" class="col-form-label"></label>
 				</th>
 				<td>
-					<input asp-for="Balcony" type="" class="form-control" />
+					<input asp-for="Balcony" type="checkbox"/>
 				</td>
 			</tr>
 			<tr>

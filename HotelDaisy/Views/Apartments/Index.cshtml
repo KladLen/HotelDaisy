@@ -14,7 +14,7 @@
     <h1 class="display-4 pb-4 text-center">Check our Apartments</h1>
 	@if (User.IsInRole("Admin"))
 	{
-		<a class="btn btn-primary float-end mb-2" asp-controller="Apartments" asp-action="Create">Add new Apartment</a>
+		<a class="btn btn-primary float-end mb-2" asp-controller="Apartments" asp-action="Create"><i class="bi bi-house-add me-2"></i>Add new Apartment</a>
 	}
 	<table class="table table-bordered align-middle" style="width:100%">
 		@foreach (var obj in Model)
@@ -37,7 +37,7 @@
 					Balcony
 				</th>
 				<td>
-					@obj.Balcony
+					<input type="checkbox" checked="@obj.Balcony" onclick="return false;" />
 				</td>
 			</tr>
 			<tr>
@@ -50,11 +50,11 @@
 			</tr>
 			<tr>
 				<td colspan="2" style="height:100px">
-					<a class="btn btn-primary w-50" asp-controller="Reservation" asp-action="CreateForSelectedApartment" asp-route-Id="@obj.Id">Book now</a>
+					<a class="btn btn-primary w-50" asp-controller="Reservation" asp-action="CreateForSelectedApartment" asp-route-Id="@obj.Id"><i class="bi bi-building-check me-2"></i>Book now</a>
 					@if (User.IsInRole("Admin"))
 					{
-						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Edit" asp-route-Id="@obj.Id">Edit</a>
-						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Delete" asp-route-Id="@obj.Id">Delete</a>
+						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Edit" asp-route-Id="@obj.Id"><i class="bi bi-pencil me-2"></i>Edit</a>
+						<a class="btn btn-primary w-50 mt-2" asp-controller="Apartments" asp-action="Delete" asp-route-Id="@obj.Id"><i class="bi bi-trash3 me-2"></i>Delete</a>
 					}
 				</td>
 			</tr>
