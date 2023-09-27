@@ -5,23 +5,14 @@
 @{
 	ViewData["Title"] = "Edit";
 	var id = ViewContext.RouteData.Values["Id"];
-	string imageBase64Data = Convert.ToBase64String(Model.Image);
-	string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
 }
 
 <h1 class="display-4 pb-4 text-center">Edit Apartment number @id</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
+	<input asp-for="Id" type="hidden" name="Id" value="@id" />
 	<div class="container">
 		<table class="table table-bordered align-middle" style="width:100%">
-			<tr>
-				<th style="width:15%">
-					Current image
-				</th>
-				<td>
-					<img src="@imageDataURL" style="width: 40%; height: auto;">
-				</td>
-			</tr>
 			<tr>
 				<th>
 					<label asp-for="ImageFile" class="col-form-label"></label>

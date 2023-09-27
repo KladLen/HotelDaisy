@@ -11,7 +11,7 @@ namespace HotelDaisy.Models
 		public bool Balcony { get; set; }
 		[Column(TypeName = "decimal(6,2)")]
 		public decimal Price { get; set; }
-		public byte[] Image { get; set; }
+		public byte[]? Image { get; set; }
 		public ICollection<Reservation> Reservations { get; set;}
 	}
 }

@@ -70,7 +70,6 @@ namespace HotelDaisy.Controllers
 				NumberOfRooms = apartment.NumberOfRooms,
 				Balcony = apartment.Balcony,
 				Price = apartment.Price,
-				Image = apartment.Image
 			};
 			return View(viewModel);
 		}
@@ -78,11 +77,59 @@ namespace HotelDaisy.Controllers
 		//POST
 		[HttpPost]
 		[Authorize(Roles = "Admin")]
-		public IActionResult Edit(Apartment obj)
+		public async Task<IActionResult> Edit(ApartmentVM obj)
 		{
-			return View(obj);
+			if (ModelState.IsValid)
+			{
+				var model = _db.Apartments.FirstOrDefault(a => a.Id == obj.Id);
+				if (model == null)
+				{
+					return BadRequest();
+				}
+				model.NumberOfRooms = obj.NumberOfRooms;
+				model.Balcony = obj.Balcony;
+				model.Price = obj.Price;
+
+				if (obj.ImageFile != null)
+				{
+					using (var memoryStream = new MemoryStream())
+					{
+						await obj.ImageFile.CopyToAsync(memoryStream);
+						model.Image = memoryStream.ToArray();
+					}
+				}
+				
+				_db.Apartments.Update(model);
+				_db.SaveChanges();
+				return RedirectToAction("Index");
+			}
+			return View();
 		}
 
-		
+		//GET
+		[Authorize(Roles = "Admin")]
+		public IActionResult Delete(int id)
+		{
+			Apartment apartment = _db.Apartments.FirstOrDefault(a => a.Id == id);
+			if (apartment == null)
+			{
+				return BadRequest();
+			}
+
+			return View(apartment);
+		}
+
+		//POST
+		[HttpPost]
+		[Authorize(Roles = "Admin")]
+		public IActionResult Delete(Apartment obj)
+		{
+			if (ModelState.IsValid)
+			{
+				_db.Apartments.Remove(obj);
+				return RedirectToAction("Index");
+			}
+			return View();
+		}
 	}
 }
