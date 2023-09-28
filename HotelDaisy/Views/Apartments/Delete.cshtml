@@ -3,14 +3,13 @@
 @model ApartmentVM
 
 @{
-	ViewData["Title"] = "Edit";
+	ViewData["Title"] = "Delete";
 	var id = ViewContext.RouteData.Values["Id"];
 }
 
-<h1 class="display-4 pb-4 text-center">Edit Apartment number @id</h1>
+<h1 class="display-5 pb-4 text-center">Are you sure you want to delete Apartment number @id?</h1>
 
 <form method="post" enctype="multipart/form-data">
-	<input asp-for="Id" type="hidden" name="Id" value="@id" />
 	<div class="container">
 		<table class="table table-bordered align-middle" style="width:100%">
 			<tr>
@@ -26,14 +25,6 @@
 			</tr>
 			<tr>
 				<th>
-					<label asp-for="ImageFile" class="col-form-label"></label>
-				</th>
-				<td>
-					<input asp-for="ImageFile" type="file" class="form-control" />
-				</td>
-			</tr>
-			<tr>
-				<th>
 					<label asp-for="NumberOfRooms" class="col-form-label"></label>
 				</th>
 				<td>
@@ -45,7 +36,7 @@
 					<label asp-for="Balcony" class="col-form-label"></label>
 				</th>
 				<td>
-					<input asp-for="Balcony" type="checkbox"/>
+					<input asp-for="Balcony" type="checkbox" class="form-check-control" />
 				</td>
 			</tr>
 			<tr>
@@ -60,7 +51,7 @@
 				<td>
 				</td>
 				<td>
-					<button type="submit" class="btn btn-primary">Save changes</button>
+					<button type="submit" class="btn btn-danger">Delete Apartment</button>
 					<a asp-controller="Apartments" asp-action="Index" class="btn btn-secondary">Back to list</a>
 				</td>
 			</tr>

@@ -71,6 +71,14 @@ namespace HotelDaisy.Controllers
 				Balcony = apartment.Balcony,
 				Price = apartment.Price,
 			};
+
+			if (apartment.Image != null)
+			{
+				string imageBase64Data = Convert.ToBase64String(apartment.Image);
+				string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+				viewModel.Image = imageDataURL;
+			}
+
 			return View(viewModel);
 		}
 
@@ -116,17 +124,34 @@ namespace HotelDaisy.Controllers
 				return BadRequest();
 			}
 
-			return View(apartment);
+			ApartmentVM viewModel = new ApartmentVM
+			{
+				Id = id,
+				NumberOfRooms = apartment.NumberOfRooms,
+				Balcony = apartment.Balcony,
+				Price = apartment.Price
+			};
+
+			if (apartment.Image != null)
+			{
+				string imageBase64Data = Convert.ToBase64String(apartment.Image);
+				string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+				viewModel.Image = imageDataURL;
+			}
+
+			return View(viewModel);
 		}
 
 		//POST
 		[HttpPost]
 		[Authorize(Roles = "Admin")]
-		public IActionResult Delete(Apartment obj)
+		public IActionResult Delete(ApartmentVM obj)
 		{
 			if (ModelState.IsValid)
 			{
-				_db.Apartments.Remove(obj);
+				var apartmentToDelete = _db.Apartments.FirstOrDefault(a => a.Id == obj.Id);
+				_db.Apartments.Remove(apartmentToDelete);
+				_db.SaveChanges();
 				return RedirectToAction("Index");
 			}
 			return View();
