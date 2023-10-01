@@ -16,8 +16,8 @@ namespace HotelDaisy.Controllers
 		//GET
 		public IActionResult Index()
 		{
-			IEnumerable<Apartment> objApartmentList = _db.Apartments;
-			return View(objApartmentList);
+			var apartmentList = _db.Apartments.ToList();
+			return View(apartmentList);
 		}
 
 		//GET

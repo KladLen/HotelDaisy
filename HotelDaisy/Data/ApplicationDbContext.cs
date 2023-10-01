@@ -8,7 +8,6 @@ namespace HotelDaisy.Data
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 		public DbSet<Apartment> Apartments { get; set; }
-//		public DbSet<Client> Clients { get; set; }
 		public DbSet<Reservation> Reservations { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
