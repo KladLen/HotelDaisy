@@ -12,10 +12,10 @@ namespace HotelDaisy.Controllers
 	{
 		private readonly ApplicationDbContext _db;
 		private readonly UserManager<ApplicationUser> _userManager;
-		public ReservationController(ApplicationDbContext db, UserManager<ApplicationUser> useserMenager)
+		public ReservationController(ApplicationDbContext db, UserManager<ApplicationUser> userMenager)
 		{
 			_db = db;
-			_userManager = useserMenager;
+			_userManager = userMenager;
 		}
 
 		//GET
@@ -75,7 +75,7 @@ namespace HotelDaisy.Controllers
 
                 return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
             }
-            
+
             ModelState.AddModelError("", "Input date are not valid.");
 			return View();
         }
