@@ -14,5 +14,8 @@ The HotelDaisy is an ASP.NET Core MVC project that allows hotels to easily manag
 - ASP.NET Core MVC
 - Entity Framework Core
 - C#
-- HTML, CSS, JavaScript
+- Bootstrap
+- HTML, CSS
 - SQL Server Database
+- ASP.NET Core Identity
+- Xunit

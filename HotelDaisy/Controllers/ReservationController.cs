@@ -46,7 +46,7 @@ namespace HotelDaisy.Controllers
                 }
 
                 bool isAvailable = false;
-                var apartamentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
+                var apartmentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
 
                 var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
                 var allApartmentsId = _db.Apartments.Select(a => a.Id);
@@ -58,7 +58,7 @@ namespace HotelDaisy.Controllers
                     return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
                 }
 
-                foreach (var group in apartamentIdGroup)
+                foreach (var group in apartmentIdGroup)
                 {
                     isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
                     if (isAvailable)
