@@ -1,6 +1,8 @@
 using HotelDaisy.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using HotelDaisy.Data.Interfaces;
+using HotelDaisy.Data.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
 	.AddRoles<IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 builder.Services.AddMvc().AddXmlSerializerFormatters();
 

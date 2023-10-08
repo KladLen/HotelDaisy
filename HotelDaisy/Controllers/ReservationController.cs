@@ -1,4 +1,6 @@
 ﻿using HotelDaisy.Data;
+using HotelDaisy.Data.Implementations;
+using HotelDaisy.Data.Interfaces;
 using HotelDaisy.Models;
 using HotelDaisy.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -12,10 +14,12 @@ namespace HotelDaisy.Controllers
 	{
 		private readonly ApplicationDbContext _db;
 		private readonly UserManager<ApplicationUser> _userManager;
-		public ReservationController(ApplicationDbContext db, UserManager<ApplicationUser> userMenager)
+        private readonly IReservationService _reservationService;
+		public ReservationController(ApplicationDbContext db, UserManager<ApplicationUser> userMenager, IReservationService reservationService)
 		{
 			_db = db;
 			_userManager = userMenager;
+            _reservationService = reservationService;
 		}
 
 		//GET
@@ -46,7 +50,7 @@ namespace HotelDaisy.Controllers
                 }
 
                 bool isAvailable = false;
-                var apartmentIdGroup = _db.Reservations.GroupBy(o => o.ApartmentId);
+                var apartmentIdGroup = _reservationService.GroupReservationsByApartmentId();
 
                 var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
                 var allApartmentsId = _db.Apartments.Select(a => a.Id);
@@ -54,7 +58,7 @@ namespace HotelDaisy.Controllers
 
                 if (_db.Reservations.IsNullOrEmpty())
                 {
-                    availableApartmentsIds = _db.Apartments.Select(o => o.Id).ToList();
+                   // availableApartmentsIds = _db.Apartments.Select(o => o.Id).ToList();
                     return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
                 }
 
@@ -185,6 +189,7 @@ namespace HotelDaisy.Controllers
                     ModelState.AddModelError("", "Selected Apartment is not available at this time. Check another dates.");
                     return View(viewModel);
                 }
+                // TODO ogarnąc co się dzieje jak user niezalogowany
             }
 
             ModelState.AddModelError("", "Input date are not valid.");
