@@ -50,34 +50,37 @@ namespace HotelDaisy.Controllers
                 }
 
                 bool isAvailable = false;
-                var apartmentIdGroup = _reservationService.GroupReservationsByApartmentId();
 
-                var allApartmentsInReservation = _db.Reservations.Select(r => r.ApartmentId);
-                var allApartmentsId = _db.Apartments.Select(a => a.Id);
-                List<int> availableApartmentsIds = allApartmentsId.Except(allApartmentsInReservation).ToList();
+				//			var apartmentIdGroup = _reservationService.GroupReservationsByApartmentId();
 
-                if (_db.Reservations.IsNullOrEmpty())
+				var apartmentInReservationGroupedById = _db.Reservations.Select(r => r.ApartmentId).Distinct().ToList();
+                var allApartmentsId = _db.Apartments.Select(a => a.Id).ToList();
+                var availableApartmentsIds = allApartmentsId.Except(apartmentInReservationGroupedById).ToList();
+
+				if (_db.Reservations.IsNullOrEmpty())
                 {
-                   // availableApartmentsIds = _db.Apartments.Select(o => o.Id).ToList();
                     return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
                 }
 
-                foreach (var group in apartmentIdGroup)
-                {
-                    isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
-                    if (isAvailable)
-                    {
-                        availableApartmentsIds.Add(group.Key);
-                    }
-                }
+				foreach (var apartmentId in apartmentInReservationGroupedById)
+				{
+					isAvailable = _db.Reservations
+						.Where(r => r.ApartmentId == apartmentId)
+						.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
 
-                if (availableApartmentsIds.IsNullOrEmpty())
+					if (isAvailable)
+					{
+						availableApartmentsIds.Add(apartmentId);
+					}
+				}
+
+				if (availableApartmentsIds.IsNullOrEmpty())
                 {
                     ModelState.AddModelError("", "No apartments available at this time.");
                     return View();
                 }
 
-                return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
+				return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
             }
 
             ModelState.AddModelError("", "Input date are not valid.");

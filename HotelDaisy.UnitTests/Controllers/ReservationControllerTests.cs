@@ -4,11 +4,16 @@ using HotelDaisy.Data.Implementations;
 using HotelDaisy.Data.Interfaces;
 using HotelDaisy.Models;
 using HotelDaisy.Models.ViewModels;
+using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Reflection;
+using System.Security.Claims;
+using System.Security.Principal;
 using Xunit;
 
 namespace HotelDaisy.UnitTests.Controllers
@@ -134,7 +139,7 @@ namespace HotelDaisy.UnitTests.Controllers
 		}
 
 		[Fact]
-		public void IndexPostAction_WhenReservationTimeIsValid_ReturnsAvailableApartments()
+ 		public void IndexPostAction_WhenReservationTimeIsValid_ReturnsAvailableApartments()
 		{
 			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
 			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
@@ -144,8 +149,8 @@ namespace HotelDaisy.UnitTests.Controllers
 
 			ReservationTime reservationTime = new ReservationTime()
 			{
-				StartDate = DateTime.Parse("2025-02-01"),
-				EndDate = DateTime.Parse("2025-02-02")
+				StartDate = DateTime.Now.AddDays(2),
+				EndDate = DateTime.Now.AddDays(4)
 			};
 
 			IActionResult result;
@@ -153,13 +158,13 @@ namespace HotelDaisy.UnitTests.Controllers
 			{
 				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.Add(new Apartment { Balcony = false, NumberOfRooms = 2, Price = 200 });
-				db.Add(new Reservation { StartDate = DateTime.Parse("2025-03-01"), EndDate = DateTime.Parse("2025-03-02"), UserId = 1.ToString(), ApartmentId = 2 });
+				db.Add(new Reservation { StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(3), ApartmentId = 1, UserId = 1.ToString()});
 				db.SaveChanges();
 
 				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
 			}
 
-			List<int> apartmentIds = new List<int> { 1, 2 };
+			List<int> apartmentIds = new List<int> { 2 };
 
 			Assert.NotNull(result);
 			var redirectToAction = Assert.IsType<RedirectToActionResult>(result);
@@ -170,7 +175,117 @@ namespace HotelDaisy.UnitTests.Controllers
 		}
 
 		[Fact]
-		public void CreateForSelectedApartmenGetAction_ReturnViewModelWithId()
+		public void CreateFromDateGetAction_ReturnViewWithAvailableReservation()
+		{
+			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
+			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+			var reservationServiceMock = new Mock<IReservationService>();
+			var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+			IActionResult result;
+			List<Apartment> list = new List<Apartment>();
+			using (ApplicationDbContext db = new(optionsBuilder.Options))
+			{
+				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+				{
+					TempData = tempData
+				};
+				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+				Apartment apartment = new Apartment { Balcony = false, NumberOfRooms = 2, Price = 200 };
+				db.Add(apartment);
+				db.SaveChanges();
+				list.Add(apartment);
+				result = controller.CreateFromDate(new List<int> { 2 }, DateTime.Parse("2025-01-01"), DateTime.Parse("2025-01-02"));
+			}
+			
+
+			Assert.NotNull(result);
+			var viewResult = Assert.IsType<ViewResult>(result);
+			var viewModel = Assert.IsType<AvailableReservation>(viewResult.Model);
+			Assert.Equal(DateTime.Parse("2025-01-01"), viewModel.StartDate);
+			Assert.Equal(DateTime.Parse("2025-01-02"), viewModel.EndDate);
+			Assert.Equal(list.First().Id, 2);
+			Assert.Equal(list.First().Price, 200);
+		}
+
+		[Fact]
+		public void CreateFromDatePostActoion_IfUserLoggedIn_SaveReservation()
+		{
+			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
+			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+			var reservationServiceMock = new Mock<IReservationService>();
+			var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
+			userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
+
+			tempData["StartDate"] = "2025-01-01";
+			tempData["EndDate"] = "2025-01-02";
+			IActionResult result;
+			Reservation reservation = new Reservation();
+			using (ApplicationDbContext db = new(optionsBuilder.Options))
+			{
+				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+				{
+					TempData = tempData,
+					ControllerContext = new ControllerContext
+					{
+						HttpContext = new DefaultHttpContext { User = user }
+					}
+				};
+				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+				db.SaveChanges();
+
+				result = controller.CreateFromDate(1);
+				reservation = db.Reservations.FirstOrDefault();
+			}
+
+			Assert.NotNull(result);
+			Assert.Equal(reservation.StartDate, DateTime.Parse("2025-01-01"));
+			Assert.Equal(reservation.EndDate, DateTime.Parse("2025-01-02"));
+			Assert.Equal(reservation.UserId, "1");
+			Assert.Equal(reservation.ApartmentId, 1);
+		}
+
+		[Fact]
+		public void CreateFromDatePostAction_RedirectsToLogin_IfUserNotAuthenticated()
+		{
+			//DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
+			//optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+
+			//var userManagerMock = new Mock<UserManager<ApplicationUser>>(
+			//	Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+			//var reservationServiceMock = new Mock<IReservationService>();
+			//var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+			//var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[0], "test"));
+			//tempData["StartDate"] = "2025-01-01";
+			//tempData["EndDate"] = "2025-01-02";
+			//IActionResult result;
+			//using (ApplicationDbContext db = new(optionsBuilder.Options))
+			//{ 
+			//	var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+			//	{
+			//		TempData = tempData,
+			//		ControllerContext = new ControllerContext
+			//		{
+			//			HttpContext = new DefaultHttpContext { User = user }
+			//		}
+			//	};
+			//	result = controller.CreateFromDate(1);
+			//}
+
+			//var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+			//Assert.Equal("Login", redirectToActionResult.ActionName);
+			//Assert.Equal("Identity", redirectToActionResult.RouteValues["area"]);
+		}
+
+		[Fact]
+		public void CreateForSelectedApartmenGetAction_ReturnViewWithId()
 		{
 			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
 			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);

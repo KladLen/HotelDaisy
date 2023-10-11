@@ -1,5 +1,9 @@
 ﻿@model HotelDaisy.Models.ViewModels.AvailableReservation
 
+@{
+	ViewData["Title"] = "Reservation";
+}
+
 <h1 class="display-4 text-center">Choose apartment for your reservation</h1>
 <h1 class="display-6 text-center">@DateOnly.FromDateTime(Model.StartDate) - @DateOnly.FromDateTime(Model.EndDate)</h1>
 

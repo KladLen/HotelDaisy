@@ -51,7 +51,8 @@ namespace HotelDaisy.Controllers
 					
 					_db.Apartments.Add(model);
 					_db.SaveChanges();
-				}
+                    return RedirectToAction("Index");
+                }
 			}
 			return View();
 		}
