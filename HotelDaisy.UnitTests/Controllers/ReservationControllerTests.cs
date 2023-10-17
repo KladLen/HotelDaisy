@@ -252,56 +252,13 @@ namespace HotelDaisy.UnitTests.Controllers
 		}
 
 		[Fact]
-		public void CreateFromDatePostAction_RedirectsToLogin_IfUserNotAuthenticated()
-		{
-			//DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			//optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
-
-			//var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-			//	Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			//var reservationServiceMock = new Mock<IReservationService>();
-			//var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-			//var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[0], "test"));
-			//tempData["StartDate"] = "2025-01-01";
-			//tempData["EndDate"] = "2025-01-02";
-			//IActionResult result;
-			//using (ApplicationDbContext db = new(optionsBuilder.Options))
-			//{ 
-			//	var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
-			//	{
-			//		TempData = tempData,
-			//		ControllerContext = new ControllerContext
-			//		{
-			//			HttpContext = new DefaultHttpContext { User = user }
-			//		}
-			//	};
-			//	result = controller.CreateFromDate(1);
-			//}
-
-			//var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
-			//Assert.Equal("Login", redirectToActionResult.ActionName);
-			//Assert.Equal("Identity", redirectToActionResult.RouteValues["area"]);
-		}
-
-		[Fact]
 		public void CreateForSelectedApartmenGetAction_ReturnViewWithId()
 		{
 			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
 			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
-
 			var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
-
-			//var mockUser = new Mock<UserManager<ApplicationUser>>();
-			//mockUser.Setup(x => x.FindByIdAsync("123"))
-			//.ReturnsAsync(new ApplicationUser()
-			//{
-			//	UserName = "test@email.com",
-			//	Id = "123"
-			//});
-
 
 			ReservationTimeForOneApartment reservationTime = new ReservationTimeForOneApartment()
 			{ ApartmentId = 1 };
@@ -316,6 +273,91 @@ namespace HotelDaisy.UnitTests.Controllers
 			var viewResult = Assert.IsType<ViewResult>(result);
 			var viewModel = Assert.IsType<ReservationTimeForOneApartment>(viewResult.Model);
 			Assert.Equal(viewModel.ApartmentId, reservationTime.ApartmentId);
+		}
+
+		[Fact]
+		public void CreateForSelectedApartmentPostAction_IfReservationTimeAvailable_SaveReservation()
+		{
+			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
+			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+			var reservationServiceMock = new Mock<IReservationService>();
+
+			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
+			userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
+
+			IActionResult result;
+			Reservation reservation = new Reservation();
+			ReservationTimeForOneApartment reservationTimeForOneApartment = new ReservationTimeForOneApartment()
+			{
+				StartDate = DateTime.Parse("2025-01-01"),
+				EndDate = DateTime.Parse("2025-01-02"),
+				ApartmentId = 1
+			};
+			using (ApplicationDbContext db = new(optionsBuilder.Options))
+			{
+				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+				{
+					ControllerContext = new ControllerContext
+					{
+						HttpContext = new DefaultHttpContext { User = user }
+					}
+				};
+				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+				db.SaveChanges();
+
+				result = controller.CreateForSelectedApartment(reservationTimeForOneApartment);
+				reservation = db.Reservations.FirstOrDefault();
+			}
+
+			Assert.NotNull(result);
+			Assert.Equal(reservationTimeForOneApartment.StartDate, reservation.StartDate);
+			Assert.Equal(reservationTimeForOneApartment.EndDate, reservation.EndDate);
+			Assert.Equal(reservation.UserId, "1");
+			Assert.Equal(reservation.ApartmentId, 1);
+		}
+
+		[Fact]
+		public void CreateForSelectedApartmentPostAction_IfApartmentIsReserved_DisplayMessage()
+		{
+			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
+			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+			var reservationServiceMock = new Mock<IReservationService>();
+
+			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
+			userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
+
+			IActionResult result;
+			Reservation reservation = new Reservation();
+			ReservationTimeForOneApartment reservationTimeForOneApartment = new ReservationTimeForOneApartment()
+			{
+				StartDate = DateTime.Parse("2025-01-01"),
+				EndDate = DateTime.Parse("2025-01-02"),
+				ApartmentId = 1
+			};
+			using (ApplicationDbContext db = new(optionsBuilder.Options))
+			{
+				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+				{
+					ControllerContext = new ControllerContext
+					{
+						HttpContext = new DefaultHttpContext { User = user }
+					}
+				};
+				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+				db.Add(new Reservation { StartDate = DateTime.Parse("2025-01-01"), EndDate = DateTime.Parse("2025-01-10"), UserId = "1", ApartmentId = 1 });
+				db.SaveChanges();
+
+				result = controller.CreateForSelectedApartment(reservationTimeForOneApartment);
+			}
+
+			Assert.NotNull(result);
+			var viewResult = Assert.IsType<ViewResult>(result);
+			var error = viewResult.ViewData.ModelState[""].Errors[0];
+			Assert.Equal("Selected Apartment is not available at this time. Check another dates.", error.ErrorMessage);
 		}
 	}
 }

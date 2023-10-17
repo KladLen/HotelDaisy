@@ -139,8 +139,8 @@ namespace HotelDaisy.Controllers
             var viewModel = new ReservationTimeForOneApartment
             {
                 ApartmentId = id,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1)
+                StartDate = DateTime.Now.AddDays(1),
+                EndDate = DateTime.Now.AddDays(2)
             };
 
             return View(viewModel);
@@ -153,8 +153,8 @@ namespace HotelDaisy.Controllers
             var viewModel = new ReservationTimeForOneApartment
             {
                 ApartmentId = obj.ApartmentId,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1)
+                StartDate = DateTime.Now.AddDays(1),
+                EndDate = DateTime.Now.AddDays(2)
             };
             if (ModelState.IsValid)
             {
