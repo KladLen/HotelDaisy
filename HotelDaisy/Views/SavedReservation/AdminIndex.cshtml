@@ -1,0 +1,45 @@
+﻿@using HotelDaisy.Models.ViewModels;
+@model List<ReservationWithUserFullName>
+@{
+    ViewData["Title"] = "Reservation Manager";
+}
+
+<h1 class="display-5 pb-4">Upcoming reservations</h1>
+<containe>
+	<div style="height: 250px; overflow-y: auto">
+		<table class="table table-border">
+			<tr>
+				<th>
+					Reservation ID
+				</th>
+				<th>
+					Time
+				</th>
+				<th>
+					Apartment Number
+				</th>
+				<th>
+					Client name
+				</th>
+			</tr>
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>
+						@item.Id
+					</td>
+					<td>
+						@DateOnly.FromDateTime(item.StartDate) - @DateOnly.FromDateTime(item.EndDate)
+					</td>
+					<td>
+						Apartment @item.ApartmentId
+					</td>
+					<td>
+						@item.FirstName @item.LastName
+					</td>
+				</tr>
+			}
+		</table>
+	</div>
+	<a asp-controller="SavedReservation" asp-action="Search" class="btn btn-secondary mt-3"><i class="bi bi-search me-2"></i>Search reservation</a>
+</containe>
