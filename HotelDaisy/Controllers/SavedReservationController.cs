@@ -57,5 +57,36 @@ namespace HotelDaisy.Controllers
         {
             return View();
         }
+
+        //POST
+        [HttpPost]
+        public IActionResult AdminIndex(SearchReservation obj)
+        {
+            if (obj == null)
+            {
+                return BadRequest();
+            }
+            if (obj.SearchOption == "Id")
+            {
+                var resultId = _db.Reservations.Where(r => r.Id == obj.Id).FirstOrDefault();
+                if (resultId == null)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+            else if (obj.SearchOption == "Name")
+            {
+                var resultName = _db.Reservations;
+            }
+            else if (obj.SearchOption == "Date")
+            {
+
+            }
+            return View(obj);
+        }
     }
 }

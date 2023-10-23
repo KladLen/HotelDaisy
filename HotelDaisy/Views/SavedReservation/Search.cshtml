@@ -1,4 +1,50 @@
-﻿@{
+﻿@using HotelDaisy.Models.ViewModels;
+@model SearchReservation
+@{
     ViewData["Title"] = "Search";
 }
+<div class="row col-md-5">
+    <form method="post">
+        <select class="form-select" asp-for="SearchOption">
+            <option value="Id">Search by Reservation ID</option>
+            <option value="Name">Search by User Name</option>
+            <option value="Date">Search by Date</option>
+        </select>
+        <div id="idField" style="display: block;">
+             <input class="form-control mt-3" asp-for="Id" type="number" placeholder="0" />
+        </div>
 
+        <div id="nameFields" style="display: none;">
+            <input class="form-control mt-3" asp-for="Name" type="text" placeholder="Name" />
+            <input class="form-control mt-3" asp-for="LastName" type="text" placeholder="Last Name" />
+        </div>
+
+        <div id="dateFields" style="display: none;">
+            <input class="form-control mt-3" asp-for="StartDate" type="date" />
+            <input class="form-control mt-3" asp-for="EndDate" type="date" />
+        </div>
+        
+        <div>
+            <button type="submit" style="width:100%" class="btn btn-primary mt-3"><i class="bi bi-search me-2"></i>Search</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("SearchOption").addEventListener("change", function () {
+        var option = this.value;
+        if (option === "Id") {
+            document.getElementById("nameFields").style.display = "none";
+            document.getElementById("idField").style.display = "block";
+            document.getElementById("dateFields").style.display = "none";
+        } else if (option === "Name") {
+            document.getElementById("nameFields").style.display = "block";
+            document.getElementById("idField").style.display = "none";
+            document.getElementById("dateFields").style.display = "none";
+        } else if (option === "Date") {
+            document.getElementById("nameFields").style.display = "none";
+            document.getElementById("idField").style.display = "none";
+            document.getElementById("dateFields").style.display = "block";
+        }
+    });
+</script>
