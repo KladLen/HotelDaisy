@@ -1,0 +1,36 @@
+﻿@using HotelDaisy.Models.ViewModels;
+@model List<ReservationWithUserFullName>
+
+<table class="table table-border">
+    <tr>
+        <th>
+            Reservation ID
+        </th>
+        <th>
+            Time
+        </th>
+        <th>
+            Apartment Number
+        </th>
+        <th>
+            Client name
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @item.Id
+            </td>
+            <td>
+                @DateOnly.FromDateTime(item.StartDate) - @DateOnly.FromDateTime(item.EndDate)
+            </td>
+            <td>
+                Apartment @item.ApartmentId
+            </td>
+            <td>
+                @item.FirstName @item.LastName
+            </td>
+        </tr>
+    }
+</table>

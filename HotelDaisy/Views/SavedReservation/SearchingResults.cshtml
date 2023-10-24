@@ -1,0 +1,13 @@
+﻿@using HotelDaisy.Models.ViewModels;
+@model List<ReservationWithUserFullName>
+@{
+    ViewData["Title"] = "Results";
+}
+
+<h1 class="display-5 pb-4">Searching Results</h1>
+
+<div>
+	@await Html.PartialAsync("_ReservationTablePartial", Model)
+</div>
+
+<a asp-controller="SavedReservation" asp-action="Search" class="btn btn-secondary mt-3"><i class="bi bi-search me-2"></i>Back to search</a>

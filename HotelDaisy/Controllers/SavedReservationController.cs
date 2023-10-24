@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using HotelDaisy.Models.ViewModels;
 using HotelDaisy.Models;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HotelDaisy.Controllers
 {
@@ -60,33 +63,80 @@ namespace HotelDaisy.Controllers
 
         //POST
         [HttpPost]
-        public IActionResult AdminIndex(SearchReservation obj)
+        public IActionResult Search(SearchReservation obj)
         {
             if (obj == null)
             {
                 return BadRequest();
             }
+
+            var reservationList = _db.Reservations.Join(_db.Users, reservation => reservation.UserId, user => user.Id, (reservation, user) => new
+            {
+                reservation.Id,
+                reservation.StartDate,
+                reservation.EndDate,
+                reservation.ApartmentId,
+                user.FirstName,
+                user.LastName
+            });
+            List<ReservationWithUserFullName> viewModel = reservationList.Select(item => new ReservationWithUserFullName
+            {
+                Id = item.Id,
+                StartDate = item.StartDate,
+                EndDate = item.EndDate,
+                ApartmentId = item.ApartmentId,
+                FirstName = item.FirstName,
+                LastName = item.LastName
+            }).ToList();
+
             if (obj.SearchOption == "Id")
             {
-                var resultId = _db.Reservations.Where(r => r.Id == obj.Id).FirstOrDefault();
-                if (resultId == null)
-                {
+                var resultId = viewModel.Where(r => r.Id == obj.Id).ToList();
 
+                if (resultId.IsNullOrEmpty())
+                {
+                    ModelState.AddModelError("", "No reservations with input ID in database");
                 }
                 else
                 {
-
+                    return RedirectToAction("SearchingResults", new { reservations = JsonConvert.SerializeObject(resultId) });
                 }
             }
             else if (obj.SearchOption == "Name")
             {
-                var resultName = _db.Reservations;
+                var resultName = viewModel.Where(r => r.FirstName == obj.Name && r.LastName == obj.LastName).ToList();
+               
+                if (resultName.IsNullOrEmpty())
+                {
+					ModelState.AddModelError("", "No reservations for input User in database");
+				}
+                else
+                {
+                    return RedirectToAction("SearchingResults", new { reservations = JsonConvert.SerializeObject(resultName) });
+                }
             }
             else if (obj.SearchOption == "Date")
             {
+                var resultDate = viewModel.Where(r => ((r.StartDate >= obj.StartDate && r.StartDate <= obj.EndDate) || (r.EndDate <= obj.EndDate && r.EndDate >= obj.StartDate)
+                            || (r.StartDate <= obj.StartDate && r.EndDate >= obj.EndDate))).ToList();
 
+                if (resultDate.IsNullOrEmpty())
+                {
+					ModelState.AddModelError("", "No reservations at the input time in database");
+				}
+                else
+                {
+                    return RedirectToAction("SearchingResults", new { reservations = JsonConvert.SerializeObject(resultDate) });
+                }
             }
             return View(obj);
+        }
+
+        //GET
+        public IActionResult SearchingResults(string reservations)
+        {
+            List<ReservationWithUserFullName> reservationList = JsonConvert.DeserializeObject<List<ReservationWithUserFullName>>(reservations);
+            return View(reservationList);
         }
     }
 }
