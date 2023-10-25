@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using HotelDaisy.Data.Implementations;
 
 namespace HotelDaisy.Controllers
 {
@@ -15,13 +17,16 @@ namespace HotelDaisy.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-        public SavedReservationController(ApplicationDbContext db, UserManager<ApplicationUser> userMenager)
+        private readonly IReservationService _reservationService;
+        public SavedReservationController(ApplicationDbContext db, UserManager<ApplicationUser> userMenager, IReservationService reservationService)
         {
             _db = db;
             _userManager = userMenager;
+            _reservationService = reservationService;
         }
 
         //GET
+        [Authorize]
         public IActionResult UserIndex()
         {
             var ReservationList = _db.Reservations
@@ -37,25 +42,15 @@ namespace HotelDaisy.Controllers
         }
 
         //GET
+        [Authorize(Roles = "Admin")]
         public IActionResult AdminIndex()
         {
-            var reservationList = _db.Reservations.Join(_db.Users, reservation => reservation.UserId, user => user.Id, (reservation, user) => new
-            {
-                reservation.Id, reservation.StartDate, reservation.EndDate, reservation.ApartmentId, user.FirstName, user.LastName
-            }).ToList();
-            List<ReservationWithUserFullName> viewModel = reservationList.Select(item => new ReservationWithUserFullName
-            {
-                Id = item.Id,
-                StartDate = item.StartDate,
-                EndDate = item.EndDate,
-                ApartmentId = item.ApartmentId,
-                FirstName = item.FirstName,
-                LastName = item.LastName
-            }).Where(r => r.StartDate >= DateTime.Now).OrderBy(r => r.StartDate).Take(20).ToList();
+            var viewModel = _reservationService.JoinReservationAndUser().Where(r => r.StartDate >= DateTime.Now).OrderBy(r => r.StartDate).Take(20).ToList();
             return View(viewModel);
         }
 
         //GET
+        [Authorize(Roles = "Admin")]
         public IActionResult Search()
         {
             return View();
@@ -63,6 +58,7 @@ namespace HotelDaisy.Controllers
 
         //POST
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Search(SearchReservation obj)
         {
             if (obj == null)
@@ -70,24 +66,7 @@ namespace HotelDaisy.Controllers
                 return BadRequest();
             }
 
-            var reservationList = _db.Reservations.Join(_db.Users, reservation => reservation.UserId, user => user.Id, (reservation, user) => new
-            {
-                reservation.Id,
-                reservation.StartDate,
-                reservation.EndDate,
-                reservation.ApartmentId,
-                user.FirstName,
-                user.LastName
-            });
-            List<ReservationWithUserFullName> viewModel = reservationList.Select(item => new ReservationWithUserFullName
-            {
-                Id = item.Id,
-                StartDate = item.StartDate,
-                EndDate = item.EndDate,
-                ApartmentId = item.ApartmentId,
-                FirstName = item.FirstName,
-                LastName = item.LastName
-            }).ToList();
+            var viewModel = _reservationService.JoinReservationAndUser();
 
             if (obj.SearchOption == "Id")
             {
@@ -105,11 +84,11 @@ namespace HotelDaisy.Controllers
             else if (obj.SearchOption == "Name")
             {
                 var resultName = viewModel.Where(r => r.FirstName == obj.Name && r.LastName == obj.LastName).ToList();
-               
+
                 if (resultName.IsNullOrEmpty())
                 {
-					ModelState.AddModelError("", "No reservations for input User in database");
-				}
+                    ModelState.AddModelError("", "No reservations for input User in database");
+                }
                 else
                 {
                     return RedirectToAction("SearchingResults", new { reservations = JsonConvert.SerializeObject(resultName) });
@@ -122,17 +101,19 @@ namespace HotelDaisy.Controllers
 
                 if (resultDate.IsNullOrEmpty())
                 {
-					ModelState.AddModelError("", "No reservations at the input time in database");
-				}
+                    ModelState.AddModelError("", "No reservations at the input time in database");
+                }
                 else
                 {
                     return RedirectToAction("SearchingResults", new { reservations = JsonConvert.SerializeObject(resultDate) });
                 }
             }
+
             return View(obj);
         }
 
         //GET
+        [Authorize(Roles = "Admin")]
         public IActionResult SearchingResults(string reservations)
         {
             List<ReservationWithUserFullName> reservationList = JsonConvert.DeserializeObject<List<ReservationWithUserFullName>>(reservations);

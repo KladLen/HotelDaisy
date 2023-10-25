@@ -1,5 +1,6 @@
 ﻿using HotelDaisy.Data.Interfaces;
 using HotelDaisy.Models;
+using HotelDaisy.Models.ViewModels;
 
 namespace HotelDaisy.Data.Implementations
 {
@@ -31,5 +32,35 @@ namespace HotelDaisy.Data.Implementations
 			}
 			return result;
 		}
-	}
+
+        public List<ReservationWithUserFullName> JoinReservationAndUser()
+        {
+			var reservation = _db.Reservations.Join(_db.Users, reservation => reservation.UserId, user => user.Id, (reservation, user) => new
+			{
+				reservation.Id,
+				reservation.StartDate,
+				reservation.EndDate,
+				reservation.ApartmentId,
+				user.FirstName,
+				user.LastName
+			});
+			List<ReservationWithUserFullName> reservationAndUser = reservation.Select(item => new ReservationWithUserFullName
+			{
+				Id = item.Id,
+				StartDate = item.StartDate,
+				EndDate = item.EndDate,
+				ApartmentId = item.ApartmentId,
+				FirstName = item.FirstName,
+				LastName = item.LastName
+			}).ToList();
+
+            return reservationAndUser;
+        }
+
+   //     public IQueryable GetDatesFromeTimeInterval(IQueryable model, DateTime start, DateTime end)
+   //     {
+			//return model.Where(r => ((r.StartDate >= start && r.StartDate <= end) || (r.EndDate <= end && r.EndDate >= start)
+			//					|| (r.StartDate <= start && r.EndDate >= end)));
+   //     }
+    }
 }

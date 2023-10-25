@@ -3,9 +3,10 @@
 @{
     ViewData["Title"] = "Search";
 }
+
 <div class="row col-md-5">
     <form method="post">
-        <select class="form-select" asp-for="SearchOption">
+        <select id="SearchOption" class="form-select" asp-for="SearchOption">
             <option value="Id">Search by Reservation ID</option>
             <option value="Name">Search by User Name</option>
             <option value="Date">Search by Date</option>
@@ -31,6 +32,13 @@
     </form>
 </div>
 
+
+    @if (Model != null)
+    {
+        <script>
+            document.getElementById("SearchOption").value = "Id";
+        </script>
+    }
 <script>
     document.getElementById("SearchOption").addEventListener("change", function () {
         var option = this.value;
