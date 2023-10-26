@@ -8,6 +8,10 @@ namespace HotelDaisy.Controllers
 	{
 		public IActionResult Index()
 		{
+			if (TempData.ContainsKey("Message"))
+			{
+				ViewBag.SuccessMsg = TempData["Message"].ToString();
+			}
 			return View();
 		}
 	}

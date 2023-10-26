@@ -11,5 +11,6 @@ namespace HotelDaisy.Data.Interfaces
 		List<int> CompareWithReservationsInDb(DateTime startDate, DateTime endDate);
 		List<ReservationWithUserFullName> JoinReservationAndUser();
 		List<T> GetDatesFromeTimeInterval<T>(List<T> model, DateTime start, DateTime end) where T : ITimeInterval;
+		bool isReservationTimeAvailable(DateTime startDate, DateTime endDate, int apartmentId);
     }
 }

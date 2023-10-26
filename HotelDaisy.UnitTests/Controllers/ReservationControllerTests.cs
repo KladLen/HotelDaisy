@@ -309,6 +309,8 @@ namespace HotelDaisy.UnitTests.Controllers
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
             userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
 
+            var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+          
             IActionResult result;
             Reservation reservation = new Reservation();
             ReservationTimeForOneApartment reservationTimeForOneApartment = new ReservationTimeForOneApartment()
@@ -325,6 +327,7 @@ namespace HotelDaisy.UnitTests.Controllers
 
                 var controller = new ReservationController(db, userManagerMock.Object, reservationService)
                 {
+                    TempData = tempData,
                     ControllerContext = new ControllerContext
                     {
                         HttpContext = new DefaultHttpContext { User = user }

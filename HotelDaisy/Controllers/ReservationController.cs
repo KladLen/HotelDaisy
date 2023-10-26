@@ -102,7 +102,8 @@ namespace HotelDaisy.Controllers
 
                     _reservationService.AddReservation(DateTime.Parse(startDateString), DateTime.Parse(endDateString), userId, apartmentId);
 
-                    return RedirectToAction("Index");
+                    TempData["Message"] = "success";
+                    return RedirectToAction("Index", "Home");
                 }
 
                 return RedirectToAction("/Account/Login", new { area = "Identity" });
@@ -150,14 +151,13 @@ namespace HotelDaisy.Controllers
                         return View(viewModel);
                     }
 
-                    var isAvailable = _db.Reservations
-                        .Where(r => r.ApartmentId == obj.ApartmentId)
-                        .All(o => (obj.StartDate <= o.StartDate && obj.EndDate <= o.StartDate) || (obj.StartDate >= o.EndDate && obj.EndDate >= o.EndDate));
+                    var isAvailable = _reservationService.isReservationTimeAvailable(obj.StartDate, obj.EndDate, obj.ApartmentId);
                    
                     if (isAvailable)
                     {
                         _reservationService.AddReservation(obj.StartDate, obj.EndDate, _userManager.GetUserId(User), obj.ApartmentId);
 
+                        TempData["Message"] = "success";
                         return RedirectToAction("Index", "Home");
                     }
 

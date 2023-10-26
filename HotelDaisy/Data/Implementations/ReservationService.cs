@@ -39,20 +39,23 @@ namespace HotelDaisy.Data.Implementations
 
 		public List<int> CompareWithReservationsInDb(DateTime startDate, DateTime endDate)
 		{
-			bool isAvailable = false;
 			List<int> result = new List<int>();
 			foreach (var apartmentId in apartmentInReservationGroupedById())
 			{
-                isAvailable = _db.Reservations
-                    .Where(r => r.ApartmentId == apartmentId)
-                    .All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
-                if (isAvailable)
+                if (isReservationTimeAvailable(startDate, endDate, apartmentId))
 				{
 					result.Add(apartmentId);
 				}
 			}
 			return result;
 		}
+
+		public bool isReservationTimeAvailable(DateTime startDate, DateTime endDate, int apartmentId)
+		{
+            return _db.Reservations
+                    .Where(r => r.ApartmentId == apartmentId)
+                    .All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
+        }
 
         public List<ReservationWithUserFullName> JoinReservationAndUser()
         {
@@ -84,7 +87,5 @@ namespace HotelDaisy.Data.Implementations
                                 || (r.EndDate <= end && r.EndDate >= start)
                                 || (r.StartDate <= start && r.EndDate >= end)).ToList();
         }
-
-        
     }
 }
