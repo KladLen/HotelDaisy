@@ -26,21 +26,29 @@ namespace HotelDaisy.Data.Implementations
 			_db.SaveChanges();
         }
 
-        public IQueryable<IGrouping<int, Reservation>> GroupReservationsByApartmentId()
+		public List<int> apartmentInReservationGroupedById()
 		{
-			return _db.Reservations.GroupBy(r => r.ApartmentId);
-		}
+            return _db.Reservations.Select(r => r.ApartmentId).Distinct().ToList();
+        }
 
-		public List<int> CompareWithReservationsInDb(IQueryable<IGrouping<int, Reservation>> apartmentIdGroup, DateTime startDate, DateTime endDate)
+        public List<int> InitApartmentIdsList()
+		{
+            var allApartmentsId = _db.Apartments.Select(a => a.Id).ToList();
+            return allApartmentsId.Except(apartmentInReservationGroupedById()).ToList();
+        }
+
+		public List<int> CompareWithReservationsInDb(DateTime startDate, DateTime endDate)
 		{
 			bool isAvailable = false;
 			List<int> result = new List<int>();
-			foreach (var group in apartmentIdGroup)
+			foreach (var apartmentId in apartmentInReservationGroupedById())
 			{
-				isAvailable = group.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
-				if (isAvailable)
+                isAvailable = _db.Reservations
+                    .Where(r => r.ApartmentId == apartmentId)
+                    .All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
+                if (isAvailable)
 				{
-					result.Add(group.Key);
+					result.Add(apartmentId);
 				}
 			}
 			return result;

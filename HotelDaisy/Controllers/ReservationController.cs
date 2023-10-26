@@ -49,32 +49,17 @@ namespace HotelDaisy.Controllers
                     return View();
                 }
 
-                bool isAvailable = false;
-
-				//			var apartmentIdGroup = _reservationService.GroupReservationsByApartmentId();
-
-				var apartmentInReservationGroupedById = _db.Reservations.Select(r => r.ApartmentId).Distinct().ToList();
-                var allApartmentsId = _db.Apartments.Select(a => a.Id).ToList();
-                var availableApartmentsIds = allApartmentsId.Except(apartmentInReservationGroupedById).ToList();
+                var availableApartmentsIds = _reservationService.InitApartmentIdsList();
 
 				if (_db.Reservations.IsNullOrEmpty())
                 {
                     return RedirectToAction("CreateFromDate", new { sendIds = availableApartmentsIds, sendStart = startDate, sendEnd = endDate });
                 }
 
-				foreach (var apartmentId in apartmentInReservationGroupedById)
-				{
-					isAvailable = _db.Reservations
-						.Where(r => r.ApartmentId == apartmentId)
-						.All(o => (startDate <= o.StartDate && endDate <= o.StartDate) || (startDate >= o.EndDate && endDate >= o.EndDate));
+                var idsList = _reservationService.CompareWithReservationsInDb(startDate, endDate);
+                availableApartmentsIds.AddRange(idsList);
 
-					if (isAvailable)
-					{
-						availableApartmentsIds.Add(apartmentId);
-					}
-				}
-
-				if (availableApartmentsIds.IsNullOrEmpty())
+                if (availableApartmentsIds.IsNullOrEmpty())
                 {
                     ModelState.AddModelError("", "No apartments available at this time.");
                     return View();
@@ -179,7 +164,6 @@ namespace HotelDaisy.Controllers
                     ModelState.AddModelError("", "Selected Apartment is not available at this time. Check another dates.");
                     return View(viewModel);
                 }
-                // TODO ogarnąc co się dzieje jak user niezalogowany
             }
 
             ModelState.AddModelError("", "Input date are not valid.");

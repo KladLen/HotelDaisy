@@ -77,11 +77,13 @@ namespace HotelDaisy.UnitTests.Controllers
 		[Fact]
 		public void IndexPostAction_WhenReservationDbIsEmptyAndReservationTimeIsValid_AllApartmentsAvailable()
 		{
-			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+            var serviceProvider = new ServiceCollection()
+                .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name))
+                .AddScoped<IReservationService, ReservationService>()
+                .BuildServiceProvider();
+
 			var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			var reservationServiceMock = new Mock<IReservationService>();
 
             TimeInterval timeInterval = new TimeInterval()
             {
@@ -90,12 +92,15 @@ namespace HotelDaisy.UnitTests.Controllers
 			};
 
 			IActionResult result;
-			using (ApplicationDbContext db = new(optionsBuilder.Options))
-			{
-				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+                db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.Add(new Apartment { Balcony = false, NumberOfRooms = 2, Price = 200 });
 				db.SaveChanges();
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
+				result = new ReservationController(db, userManagerMock.Object, reservationService).Index(timeInterval);
 			}
 
 			List<int> apartmentIds = new List<int> { 1, 2 };
@@ -111,11 +116,13 @@ namespace HotelDaisy.UnitTests.Controllers
 		[Fact]
 		public void IndexPostAction_WhenReservationTimeIsValidAndAllApartmentsNotAvailable_ReturnError()
 		{
-			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
-			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+            var serviceProvider = new ServiceCollection()
+                .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name))
+                .AddScoped<IReservationService, ReservationService>()
+                .BuildServiceProvider();
+
+            var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			var reservationServiceMock = new Mock<IReservationService>();
 
             TimeInterval timeInterval = new TimeInterval()
             {
@@ -124,13 +131,16 @@ namespace HotelDaisy.UnitTests.Controllers
 			};
 
 			IActionResult result;
-			using (ApplicationDbContext db = new(optionsBuilder.Options))
+			using (var scope = serviceProvider.CreateScope())
 			{
-				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+                db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.Add(new Reservation { StartDate = DateTime.Parse("2025-01-01"), EndDate = DateTime.Parse("2025-01-02"), UserId = 1.ToString(), ApartmentId = 1 });
 				db.SaveChanges();
 
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
+				result = new ReservationController(db, userManagerMock.Object, reservationService).Index(timeInterval);
 			}
 
 			Assert.NotNull(result);
@@ -142,11 +152,12 @@ namespace HotelDaisy.UnitTests.Controllers
 		[Fact]
  		public void IndexPostAction_WhenReservationTimeIsValid_ReturnsAvailableApartments()
 		{
-			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
-			var userManagerMock = new Mock<UserManager<ApplicationUser>>
+            var serviceProvider = new ServiceCollection()
+                .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name))
+                .AddScoped<IReservationService, ReservationService>()
+                .BuildServiceProvider();
+            var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			var reservationServiceMock = new Mock<IReservationService>();
 
             TimeInterval timeInterval = new TimeInterval()
             {
@@ -155,14 +166,17 @@ namespace HotelDaisy.UnitTests.Controllers
 			};
 
 			IActionResult result;
-			using (ApplicationDbContext db = new(optionsBuilder.Options))
-			{
+			using (var scope = serviceProvider.CreateScope())
+            {
+				var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+				var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
 				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.Add(new Apartment { Balcony = false, NumberOfRooms = 2, Price = 200 });
 				db.Add(new Reservation { StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(3), ApartmentId = 1, UserId = 1.ToString()});
 				db.SaveChanges();
 
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
+				result = new ReservationController(db, userManagerMock.Object, reservationService).Index(timeInterval);
 			}
 
 			List<int> apartmentIds = new List<int> { 2 };
