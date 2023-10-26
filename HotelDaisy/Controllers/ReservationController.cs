@@ -30,7 +30,7 @@ namespace HotelDaisy.Controllers
 
 		//POST
 		[HttpPost]
-		public IActionResult Index(ReservationTime obj)
+		public IActionResult Index(TimeInterval obj)
 		{
 			if (ModelState.IsValid)
 			{

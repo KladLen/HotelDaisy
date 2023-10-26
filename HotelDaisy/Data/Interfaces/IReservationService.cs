@@ -8,6 +8,6 @@ namespace HotelDaisy.Data.Interfaces
 		IQueryable<IGrouping<int, Reservation>> GroupReservationsByApartmentId();
 		List<int> CompareWithReservationsInDb(IQueryable<IGrouping<int, Reservation>> apartmentIdGroup, DateTime startDate, DateTime endDate);
 		List<ReservationWithUserFullName> JoinReservationAndUser();
-	//	IQueryable GetDatesFromeTimeInterval(IQueryable model, DateTime start, DateTime end);
-	}
+		public List<T> GetDatesFromeTimeInterval<T>(List<T> model, DateTime start, DateTime end) where T : ITimeInterval;
+    }
 }

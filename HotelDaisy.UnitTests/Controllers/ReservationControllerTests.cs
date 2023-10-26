@@ -29,7 +29,7 @@ namespace HotelDaisy.UnitTests.Controllers
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
 
-			ReservationTime reservationTime = new ReservationTime()
+			TimeInterval timeInterval = new TimeInterval()
 			{
 				StartDate = DateTime.Parse("2025-01-02"),
 				EndDate = DateTime.Parse("2025-01-01")
@@ -37,7 +37,7 @@ namespace HotelDaisy.UnitTests.Controllers
 			IActionResult result;
 			using (ApplicationDbContext db = new(optionsBuilder.Options))
 			{
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
+				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
 			}
 
 			Assert.NotNull(result);
@@ -56,15 +56,15 @@ namespace HotelDaisy.UnitTests.Controllers
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
 
-			ReservationTime reservationTime = new ReservationTime()
-			{
+            TimeInterval timeInterval = new TimeInterval()
+            {
 				StartDate = DateTime.Parse("2020-01-01"),
 				EndDate = DateTime.Parse("2025-01-01")
 			};
 			IActionResult result;
 			using (ApplicationDbContext db = new(optionsBuilder.Options))
 			{
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
+				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
 			}
 
 			Assert.NotNull(result);
@@ -82,8 +82,8 @@ namespace HotelDaisy.UnitTests.Controllers
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
 
-			ReservationTime reservationTime = new ReservationTime()
-			{
+            TimeInterval timeInterval = new TimeInterval()
+            {
 				StartDate = DateTime.Parse("2025-01-01"),
 				EndDate = DateTime.Parse("2025-01-02")
 			};
@@ -94,7 +94,7 @@ namespace HotelDaisy.UnitTests.Controllers
 				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.Add(new Apartment { Balcony = false, NumberOfRooms = 2, Price = 200 });
 				db.SaveChanges();
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
+				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
 			}
 
 			List<int> apartmentIds = new List<int> { 1, 2 };
@@ -102,8 +102,8 @@ namespace HotelDaisy.UnitTests.Controllers
 			Assert.NotNull(result);
 			var redirectToAction = Assert.IsType<RedirectToActionResult>(result);
 			Assert.Equal("CreateFromDate", redirectToAction.ActionName);
-			Assert.Equal(reservationTime.StartDate, redirectToAction.RouteValues["sendStart"]);
-			Assert.Equal(reservationTime.EndDate, redirectToAction.RouteValues["sendEnd"]);
+			Assert.Equal(timeInterval.StartDate, redirectToAction.RouteValues["sendStart"]);
+			Assert.Equal(timeInterval.EndDate, redirectToAction.RouteValues["sendEnd"]);
 			Assert.Equal(apartmentIds, redirectToAction.RouteValues["sendIds"]);
 		}
 
@@ -116,8 +116,8 @@ namespace HotelDaisy.UnitTests.Controllers
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
 
-			ReservationTime reservationTime = new ReservationTime()
-			{
+            TimeInterval timeInterval = new TimeInterval()
+            {
 				StartDate = DateTime.Parse("2025-01-01"),
 				EndDate = DateTime.Parse("2025-01-02")
 			};
@@ -129,7 +129,7 @@ namespace HotelDaisy.UnitTests.Controllers
 				db.Add(new Reservation { StartDate = DateTime.Parse("2025-01-01"), EndDate = DateTime.Parse("2025-01-02"), UserId = 1.ToString(), ApartmentId = 1 });
 				db.SaveChanges();
 
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
+				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
 			}
 
 			Assert.NotNull(result);
@@ -147,8 +147,8 @@ namespace HotelDaisy.UnitTests.Controllers
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
 
-			ReservationTime reservationTime = new ReservationTime()
-			{
+            TimeInterval timeInterval = new TimeInterval()
+            {
 				StartDate = DateTime.Now.AddDays(2),
 				EndDate = DateTime.Now.AddDays(4)
 			};
@@ -161,7 +161,7 @@ namespace HotelDaisy.UnitTests.Controllers
 				db.Add(new Reservation { StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(3), ApartmentId = 1, UserId = 1.ToString()});
 				db.SaveChanges();
 
-				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(reservationTime);
+				result = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object).Index(timeInterval);
 			}
 
 			List<int> apartmentIds = new List<int> { 2 };
@@ -169,8 +169,8 @@ namespace HotelDaisy.UnitTests.Controllers
 			Assert.NotNull(result);
 			var redirectToAction = Assert.IsType<RedirectToActionResult>(result);
 			Assert.Equal("CreateFromDate", redirectToAction.ActionName);
-			Assert.Equal(reservationTime.StartDate, redirectToAction.RouteValues["sendStart"]);
-			Assert.Equal(reservationTime.EndDate, redirectToAction.RouteValues["sendEnd"]);
+			Assert.Equal(timeInterval.StartDate, redirectToAction.RouteValues["sendStart"]);
+			Assert.Equal(timeInterval.EndDate, redirectToAction.RouteValues["sendEnd"]);
 			Assert.Equal(apartmentIds, redirectToAction.RouteValues["sendIds"]);
 		}
 

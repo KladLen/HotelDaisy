@@ -57,10 +57,11 @@ namespace HotelDaisy.Data.Implementations
             return reservationAndUser;
         }
 
-   //     public IQueryable GetDatesFromeTimeInterval(IQueryable model, DateTime start, DateTime end)
-   //     {
-			//return model.Where(r => ((r.StartDate >= start && r.StartDate <= end) || (r.EndDate <= end && r.EndDate >= start)
-			//					|| (r.StartDate <= start && r.EndDate >= end)));
-   //     }
+		public List<T> GetDatesFromeTimeInterval<T>(List<T> model, DateTime start, DateTime end) where T : ITimeInterval
+        {
+            return model.Where(r => (r.StartDate >= start && r.StartDate <= end)
+                                || (r.EndDate <= end && r.EndDate >= start)
+                                || (r.StartDate <= start && r.EndDate >= end)).ToList();
+        }
     }
 }

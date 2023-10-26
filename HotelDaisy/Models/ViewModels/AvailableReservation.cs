@@ -1,15 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel;
+﻿using HotelDaisy.Data.Implementations;
 
 namespace HotelDaisy.Models.ViewModels
 {
-    public class AvailableReservation
+    public class AvailableReservation : TimeInterval
     {
-        [DisplayName("Start Date")]
-        public DateTime StartDate { get; set; }
-        [DisplayName("End Date")]
-        public DateTime EndDate { get; set; }
         public List<Apartment> AvailableApartments { get; set; }
- //       public int ChosenApartmentId { get; set; }
     }
 }

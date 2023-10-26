@@ -1,13 +1,9 @@
-﻿using System.ComponentModel;
+﻿using HotelDaisy.Data.Implementations;
 
 namespace HotelDaisy.Models.ViewModels
 {
-    public class ReservationTimeForOneApartment
+    public class ReservationTimeForOneApartment : TimeInterval
     {
-        [DisplayName("Start Date")]
-        public DateTime StartDate { get; set; }
-        [DisplayName("End Date")]
-        public DateTime EndDate { get; set; }
         public int ApartmentId { get; set; }
     }
 }

@@ -96,8 +96,7 @@ namespace HotelDaisy.Controllers
             }
             else if (obj.SearchOption == "Date")
             {
-                var resultDate = viewModel.Where(r => ((r.StartDate >= obj.StartDate && r.StartDate <= obj.EndDate) || (r.EndDate <= obj.EndDate && r.EndDate >= obj.StartDate)
-                            || (r.StartDate <= obj.StartDate && r.EndDate >= obj.EndDate))).ToList();
+                var resultDate = _reservationService.GetDatesFromeTimeInterval(viewModel, obj.StartDate, obj.EndDate);
 
                 if (resultDate.IsNullOrEmpty())
                 {

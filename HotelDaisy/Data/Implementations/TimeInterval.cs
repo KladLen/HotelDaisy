@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+﻿using HotelDaisy.Data.Interfaces;
+using System.ComponentModel;
 
-namespace HotelDaisy.Models.ViewModels
+namespace HotelDaisy.Data.Implementations
 {
-    public class ReservationTime
+    public class TimeInterval : ITimeInterval
     {
         [DisplayName("Start Date")]
         public DateTime StartDate { get; set; }
