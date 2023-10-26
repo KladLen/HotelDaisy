@@ -115,15 +115,8 @@ namespace HotelDaisy.Controllers
                     var startDateString = TempData["StartDate"] as string;
                     var endDateString = TempData["EndDate"] as string;
 
-                    Reservation reservation = new Reservation
-                    {
-                        StartDate = DateTime.Parse(startDateString),
-                        EndDate = DateTime.Parse(endDateString),
-                        UserId = userId,
-                        ApartmentId = apartmentId
-                    };
-                    _db.Reservations.Add(reservation);
-                    _db.SaveChanges();
+                    _reservationService.AddReservation(DateTime.Parse(startDateString), DateTime.Parse(endDateString), userId, apartmentId);
+
                     return RedirectToAction("Index");
                 }
 
@@ -175,17 +168,11 @@ namespace HotelDaisy.Controllers
                     var isAvailable = _db.Reservations
                         .Where(r => r.ApartmentId == obj.ApartmentId)
                         .All(o => (obj.StartDate <= o.StartDate && obj.EndDate <= o.StartDate) || (obj.StartDate >= o.EndDate && obj.EndDate >= o.EndDate));
+                   
                     if (isAvailable)
                     {
-                        Reservation reservation = new Reservation
-                        {
-                            StartDate = obj.StartDate,
-                            EndDate = obj.EndDate,
-                            UserId = _userManager.GetUserId(User),
-                            ApartmentId = obj.ApartmentId
-                        };
-                        _db.Reservations.Add(reservation);
-                        _db.SaveChanges();
+                        _reservationService.AddReservation(obj.StartDate, obj.EndDate, _userManager.GetUserId(User), obj.ApartmentId);
+
                         return RedirectToAction("Index", "Home");
                     }
 

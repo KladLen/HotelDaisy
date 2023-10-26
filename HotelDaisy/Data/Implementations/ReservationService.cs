@@ -13,7 +13,20 @@ namespace HotelDaisy.Data.Implementations
 			_db = db;
 		}
 
-		public IQueryable<IGrouping<int, Reservation>> GroupReservationsByApartmentId()
+        public void AddReservation(DateTime startDate, DateTime endDate, string userId, int apartmentId)
+        {
+            Reservation reservation = new Reservation
+			{
+				StartDate = startDate,
+				EndDate = endDate,
+				UserId = userId,
+				ApartmentId = apartmentId
+			};
+			_db.Reservations.Add(reservation);
+			_db.SaveChanges();
+        }
+
+        public IQueryable<IGrouping<int, Reservation>> GroupReservationsByApartmentId()
 		{
 			return _db.Reservations.GroupBy(r => r.ApartmentId);
 		}
@@ -63,5 +76,7 @@ namespace HotelDaisy.Data.Implementations
                                 || (r.EndDate <= end && r.EndDate >= start)
                                 || (r.StartDate <= start && r.EndDate >= end)).ToList();
         }
+
+        
     }
 }

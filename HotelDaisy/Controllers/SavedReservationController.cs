@@ -3,13 +3,9 @@ using HotelDaisy.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using HotelDaisy.Models.ViewModels;
-using HotelDaisy.Models;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-using HotelDaisy.Data.Implementations;
 
 namespace HotelDaisy.Controllers
 {
@@ -29,15 +25,10 @@ namespace HotelDaisy.Controllers
         [Authorize]
         public IActionResult UserIndex()
         {
-            var ReservationList = _db.Reservations
+            var reservationsList = _db.Reservations
                 .Where(r => r.UserId == _userManager.GetUserId(User)).OrderBy(r => r.StartDate).ToList();
-
-			List<Reservation> upcomingReservations = ReservationList.Where(r => r.StartDate > DateTime.Now).ToList();
-			ReservationHistory viewModel = new ReservationHistory()
-            {
-                UpcomingReservations = upcomingReservations,
-				OldReservations = ReservationList.Except(upcomingReservations).ToList()
-			};
+            ReservationHistory viewModel = new ReservationHistory(reservationsList);
+            
             return View(viewModel);
         }
 

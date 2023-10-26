@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Reflection;
 using System.Security.Claims;
@@ -213,11 +214,14 @@ namespace HotelDaisy.UnitTests.Controllers
 		[Fact]
 		public void CreateFromDatePostActoion_IfUserLoggedIn_SaveReservation()
 		{
-			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
+            var serviceProvider = new ServiceCollection()
+                .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name))
+                .AddScoped<IReservationService, ReservationService>()
+                .BuildServiceProvider();
+
 			var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			var reservationServiceMock = new Mock<IReservationService>();
+
 			var tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
@@ -227,9 +231,11 @@ namespace HotelDaisy.UnitTests.Controllers
 			tempData["EndDate"] = "2025-01-02";
 			IActionResult result;
 			Reservation reservation = new Reservation();
-			using (ApplicationDbContext db = new(optionsBuilder.Options))
-			{
-				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+                var controller = new ReservationController(db, userManagerMock.Object, reservationService)
 				{
 					TempData = tempData,
 					ControllerContext = new ControllerContext
@@ -278,33 +284,40 @@ namespace HotelDaisy.UnitTests.Controllers
 		[Fact]
 		public void CreateForSelectedApartmentPostAction_IfReservationTimeAvailable_SaveReservation()
 		{
-			DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
-			optionsBuilder.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name);
-			var userManagerMock = new Mock<UserManager<ApplicationUser>>
-				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-			var reservationServiceMock = new Mock<IReservationService>();
+            var serviceProvider = new ServiceCollection()
+				.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(MethodBase.GetCurrentMethod().Name))
+				.AddScoped<IReservationService, ReservationService>()
+				.BuildServiceProvider();
 
-			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
-			userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
+            var userManagerMock = new Mock<UserManager<ApplicationUser>>
+            	(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 
-			IActionResult result;
-			Reservation reservation = new Reservation();
-			ReservationTimeForOneApartment reservationTimeForOneApartment = new ReservationTimeForOneApartment()
-			{
-				StartDate = DateTime.Parse("2025-01-01"),
-				EndDate = DateTime.Parse("2025-01-02"),
-				ApartmentId = 1
-			};
-			using (ApplicationDbContext db = new(optionsBuilder.Options))
-			{
-				var controller = new ReservationController(db, userManagerMock.Object, reservationServiceMock.Object)
-				{
-					ControllerContext = new ControllerContext
-					{
-						HttpContext = new DefaultHttpContext { User = user }
-					}
-				};
-				db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
+            userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
+
+            IActionResult result;
+            Reservation reservation = new Reservation();
+            ReservationTimeForOneApartment reservationTimeForOneApartment = new ReservationTimeForOneApartment()
+            {
+                StartDate = DateTime.Parse("2025-01-01"),
+                EndDate = DateTime.Parse("2025-01-02"),
+                ApartmentId = 1
+            };
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+                var controller = new ReservationController(db, userManagerMock.Object, reservationService)
+                {
+                    ControllerContext = new ControllerContext
+                    {
+                        HttpContext = new DefaultHttpContext { User = user }
+                    }
+                };
+
+                db.Add(new Apartment { Balcony = true, NumberOfRooms = 1, Price = 100 });
 				db.SaveChanges();
 
 				result = controller.CreateForSelectedApartment(reservationTimeForOneApartment);
@@ -314,8 +327,8 @@ namespace HotelDaisy.UnitTests.Controllers
 			Assert.NotNull(result);
 			Assert.Equal(reservationTimeForOneApartment.StartDate, reservation.StartDate);
 			Assert.Equal(reservationTimeForOneApartment.EndDate, reservation.EndDate);
-			Assert.Equal(reservation.UserId, "1");
-			Assert.Equal(reservation.ApartmentId, 1);
+			Assert.Equal("1", reservation.UserId);
+			Assert.Equal(1, reservation.ApartmentId);
 		}
 
 		[Fact]
@@ -326,8 +339,9 @@ namespace HotelDaisy.UnitTests.Controllers
 			var userManagerMock = new Mock<UserManager<ApplicationUser>>
 				(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
 			var reservationServiceMock = new Mock<IReservationService>();
+            
 
-			var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { }, "test"));
 			userManagerMock.Setup(x => x.GetUserId(user)).Returns("1");
 
 			IActionResult result;
