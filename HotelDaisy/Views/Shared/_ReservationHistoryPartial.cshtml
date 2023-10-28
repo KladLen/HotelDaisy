@@ -1,0 +1,21 @@
+﻿@using HotelDaisy.Models;
+@model List<Reservation>
+
+<div>
+	<table class="table table-bordered">
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>
+					@DateOnly.FromDateTime(item.StartDate) - @DateOnly.FromDateTime(item.EndDate)
+				</td>
+				<td>
+					Apartment @item.ApartmentId
+				</td>
+				<td>
+					Reservation Number: @item.Id
+				</td>
+			</tr>
+		}
+	</table>
+</div>

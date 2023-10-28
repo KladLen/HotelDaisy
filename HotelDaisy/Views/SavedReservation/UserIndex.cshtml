@@ -6,37 +6,7 @@
 }
 
 <h1 class="display-5 pb-2">Your upcoming reservations</h1>
-
-<div>
-	<table class="table table-bordered">
-		@foreach (var item in Model.UpcomingReservations)
-		{
-			<tr>
-				<td>
-					@DateOnly.FromDateTime(item.StartDate) - @DateOnly.FromDateTime(item.EndDate)
-				</td>
-				<td>
-					Apartment @item.ApartmentId
-				</td>
-			</tr>
-		}
-	</table>
-</div>
+@await Html.PartialAsync("_ReservationHistoryPartial", Model.UpcomingReservations)
 
 <h1 class="display-5 pb-2">Your booking history</h1>
-
-<div>
-	<table class="table table-bordered">
-		@foreach (var item in Model.OldReservations)
-		{
-			<tr>
-				<td>
-					@DateOnly.FromDateTime(item.StartDate) - @DateOnly.FromDateTime(item.EndDate)
-				</td>
-				<td>
-					Apartment @item.ApartmentId
-				</td>
-			</tr>
-		}
-	</table>
-</div>
+@await Html.PartialAsync("_ReservationHistoryPartial", Model.OldReservations)
