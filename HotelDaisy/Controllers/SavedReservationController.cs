@@ -109,5 +109,16 @@ namespace HotelDaisy.Controllers
             List<ReservationWithUserFullName> reservationList = JsonConvert.DeserializeObject<List<ReservationWithUserFullName>>(reservations);
             return View(reservationList);
         }
+
+        //GET
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(int reservationId)
+        {
+            var reservationToDelete = _db.Reservations.FirstOrDefault(r => r.Id == reservationId);
+            _db.Reservations.Remove(reservationToDelete);
+            _db.SaveChanges();
+            return View("Search");
+        }
     }
 }
+

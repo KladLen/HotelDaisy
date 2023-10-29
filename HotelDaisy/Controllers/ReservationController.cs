@@ -73,6 +73,7 @@ namespace HotelDaisy.Controllers
         }
 
 		//GET
+		[Authorize]
 		public IActionResult CreateFromDate(List<int> sendIds, DateTime sendStart, DateTime sendEnd)
         {
             List<Apartment> availableApartments = _db.Apartments.Where(o => sendIds.Contains(o.Id)).ToList();
@@ -105,8 +106,6 @@ namespace HotelDaisy.Controllers
                     TempData["Message"] = "success";
                     return RedirectToAction("Index", "Home");
                 }
-
-                return RedirectToAction("/Account/Login", new { area = "Identity" });
             }
 
             return View();

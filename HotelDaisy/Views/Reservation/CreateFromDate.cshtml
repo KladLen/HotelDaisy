@@ -19,7 +19,7 @@
 				<img src="@imageDataURL" style="max-width: 100%; height: auto;">
 			</td>
 			<th class="ps-3" style="width:25%">
-				Rooms number
+				<label asp-for="@obj.NumberOfRooms" class="col-form-label"></label>
 			</th>
 			<td class="ps-3" style="width:25%">
 				@obj.NumberOfRooms
@@ -27,7 +27,7 @@
 		</tr>
 		<tr>
 			<th class="ps-3">
-				Balcony
+				<label asp-for="@obj.Balcony" class="col-form-label"></label>
 			</th>
 			<td class="ps-3">
 				<input type="checkbox" checked="@obj.Balcony" onclick="return false;" />
@@ -35,7 +35,7 @@
 		</tr>
 		<tr>
 			<th class="ps-3">
-				Price
+				<label asp-for="@obj.Price" class="col-form-label"></label>
 			</th>
 			<td class="ps-3">
 				@obj.Price
